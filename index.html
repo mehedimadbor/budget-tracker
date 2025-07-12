@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Budget Tracker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #1f1f1f;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+    }
+    input, select {
+      background: #2a2a2a;
+      color: #fff;
+    }
+    button {
+      background: #ffffff;
+      color: #000;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #d1d1d1;
+    }
+    .entry-list {
+      margin-top: 20px;
+    }
+    .entry-item {
+      background: #2a2a2a;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .summary {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .print-pdf-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .print-pdf-buttons button {
+      flex: 1;
+    }
+    .daily-summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #2c2c2c;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .daily-summary h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      color: #00ffd5;
+    }
+    .daily-summary p {
+      background: #1e1e1e;
+      padding: 8px 12px;
+      border-left: 5px solid #00ffd5;
+      border-radius: 5px;
+      margin: 6px 0;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="tracker">
+    <h1>Budget Tracker</h1>
+
+    <label for="income">Balance Add Koro:</label>
+    <input type="number" id="income" placeholder="Ex: 20000" />
+    <button onclick="addIncome()">Balance Add</button>
+
+    <label for="amount">Khorocher Amount:</label>
+    <input type="number" id="amount" placeholder="Ex: 100" />
+
+    <label for="category">Category:</label>
+    <select id="category">
+      <option value="Khawa">Khawa</option>
+      <option value="Ghari Vara">Ghari Vara</option>
+      <option value="Onno Khoroch">Onno Khoroch</option>
+    </select>
+
+    <input type="text" id="newCategory" placeholder="Notun Category (optional)" />
+    <button onclick="addCategory()">Notun Category Add</button>
+
+    <button onclick="addExpense()">Khoroch Add</button>
+    <button onclick="resetData()" style="background:#ff4444;color:white">Reset All</button>
+    <button onclick="resetDailySummary()" style="background:#555;color:white">Reset Daily Summary</button>
+
+    <div class="entry-list" id="entries"></div>
+
+    <div class="summary">
+      <p>Total Balance: <span id="totalIncome">0</span> Tk</p>
+      <p>Total Khoroch: <span id="totalExpense">0</span> Tk</p>
+      <p>Available Balance: <span id="balance">0</span> Tk</p>
+    </div>
+
+    <div class="daily-summary" id="dailySummary"></div>
+
+    <div class="print-pdf-buttons">
+      <button onclick="window.print()">Print Result</button>
+      <button onclick="downloadPDF()">Download PDF</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const dailyData = {};
+
+    function getToday() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    function addIncome() {
+      const incomeInput = document.getElementById("income");
+      const value = parseFloat(incomeInput.value);
+      if (!isNaN(value) && value > 0) {
+        totalIncome += value;
+        incomeInput.value = "";
+        updateDisplay();
+      }
+    }
+
+    function addExpense() {
+      const amountInput = document.getElementById("amount");
+      const category = document.getElementById("category").value;
+      const value = parseFloat(amountInput.value);
+
+      if (!isNaN(value) && value > 0) {
+        totalExpense += value;
+
+        const today = getToday();
+        if (!dailyData[today]) {
+          dailyData[today] = { income: totalIncome, expense: 0 };
+        }
+        dailyData[today].expense += value;
+
+        const entryDiv = document.getElementById("entries");
+        const entry = document.createElement("div");
+        entry.classList.add("entry-item");
+
+        const entryText = document.createElement("span");
+        entryText.textContent = `${category}: ${value} Tk`;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = "<strong>Delete</strong>";
+        deleteBtn.title = "Delete";
+        deleteBtn.style.background = "#ff4444";
+        deleteBtn.style.color = "#fff";
+        deleteBtn.style.fontSize = "10px";
+        deleteBtn.style.fontWeight = "bold";
+        deleteBtn.style.padding = "2px 6px";
+        deleteBtn.style.border = "none";
+        deleteBtn.style.borderRadius = "3px";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.style.cursor = "pointer";
+
+        deleteBtn.onclick = function () {
+          totalExpense -= value;
+          dailyData[today].expense -= value;
+          entry.remove();
+          updateDisplay();
+          updateDailySummary();
+        };
+
+        entry.appendChild(entryText);
+        entry.appendChild(deleteBtn);
+        entryDiv.appendChild(entry);
+
+        amountInput.value = "";
+        updateDisplay();
+        updateDailySummary();
+      }
+    }
+
+    function updateDisplay() {
+      document.getElementById("totalIncome").textContent = totalIncome;
+      document.getElementById("totalExpense").textContent = totalExpense;
+      document.getElementById("balance").textContent = totalIncome - totalExpense;
+    }
+
+    function updateDailySummary() {
+      const summaryDiv = document.getElementById("dailySummary");
+      summaryDiv.innerHTML = "<h3>📅 Daily Summary</h3>";
+      for (const date in dailyData) {
+        const data = dailyData[date];
+        const line = document.createElement("p");
+        line.textContent = `${date} ➤ Khoroch: ${data.expense} Tk | Available Balance: ${data.income - data.expense} Tk`;
+        summaryDiv.appendChild(line);
+      }
+    }
+
+    function resetData() {
+      totalExpense = 0;
+      document.getElementById("entries").innerHTML = "";
+      updateDisplay();
+      updateDailySummary();
+    }
+
+    function resetDailySummary() {
+      for (let key in dailyData) delete dailyData[key];
+      document.getElementById("dailySummary").innerHTML = "";
+    }
+
+    function addCategory() {
+      const newCatInput = document.getElementById("newCategory");
+      const newCatValue = newCatInput.value.trim();
+      if (newCatValue !== "") {
+        const option = document.createElement("option");
+        option.value = newCatValue;
+        option.textContent = newCatValue;
+        document.getElementById("category").appendChild(option);
+        newCatInput.value = "";
+      }
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById("tracker");
+      const opt = {
+        margin: 0.5,
+        filename: 'budget-report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+</body>
+</html>
