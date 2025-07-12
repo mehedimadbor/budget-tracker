@@ -143,6 +143,32 @@
       return today.toISOString().split('T')[0];
     }
 
+    function saveData() {
+      const data = {
+        totalIncome,
+        totalExpense,
+        dailyData,
+        entries: document.getElementById("entries").innerHTML,
+        categoryOptions: Array.from(document.getElementById("category").options).map(opt => opt.outerHTML)
+      };
+      localStorage.setItem("budgetData", JSON.stringify(data));
+    }
+
+    function loadDeleteButtons() {
+      document.querySelectorAll(".entry-item button").forEach(btn => {
+        btn.onclick = function () {
+          const value = parseFloat(btn.parentElement.textContent.split(":")[1]);
+          totalExpense -= value;
+          const date = getToday();
+          if (dailyData[date]) dailyData[date].expense -= value;
+          btn.parentElement.remove();
+          updateDisplay();
+          updateDailySummary();
+          saveData();
+        };
+      });
+    }
+
     function addIncome() {
       const incomeInput = document.getElementById("income");
       const value = parseFloat(incomeInput.value);
@@ -150,6 +176,7 @@
         totalIncome += value;
         incomeInput.value = "";
         updateDisplay();
+        saveData();
       }
     }
 
@@ -193,6 +220,7 @@
           entry.remove();
           updateDisplay();
           updateDailySummary();
+          saveData();
         };
 
         entry.appendChild(entryText);
@@ -202,6 +230,7 @@
         amountInput.value = "";
         updateDisplay();
         updateDailySummary();
+        saveData();
       }
     }
 
@@ -223,15 +252,18 @@
     }
 
     function resetData() {
+      totalIncome = 0;
       totalExpense = 0;
       document.getElementById("entries").innerHTML = "";
       updateDisplay();
       updateDailySummary();
+      saveData();
     }
 
     function resetDailySummary() {
       for (let key in dailyData) delete dailyData[key];
       document.getElementById("dailySummary").innerHTML = "";
+      saveData();
     }
 
     function addCategory() {
@@ -243,6 +275,7 @@
         option.textContent = newCatValue;
         document.getElementById("category").appendChild(option);
         newCatInput.value = "";
+        saveData();
       }
     }
 
@@ -257,6 +290,26 @@
       };
       html2pdf().set(opt).from(element).save();
     }
+
+    window.onload = () => {
+      const saved = JSON.parse(localStorage.getItem("budgetData"));
+      if (saved) {
+        totalIncome = saved.totalIncome || 0;
+        totalExpense = saved.totalExpense || 0;
+        Object.assign(dailyData, saved.dailyData || {});
+        document.getElementById("entries").innerHTML = saved.entries || "";
+
+        const categorySelect = document.getElementById("category");
+        categorySelect.innerHTML = "";
+        (saved.categoryOptions || []).forEach(optHTML => {
+          categorySelect.insertAdjacentHTML("beforeend", optHTML);
+        });
+
+        updateDisplay();
+        updateDailySummary();
+        loadDeleteButtons();
+      }
+    };
   </script>
 </body>
 </html>
