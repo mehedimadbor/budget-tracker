@@ -68,20 +68,20 @@
     .print-pdf-buttons button {
       flex: 1;
     }
-    .daily-summary {
+    .daily-summary, #filteredResult, #monthlySummary {
       margin-top: 20px;
       padding: 15px;
       background: #2c2c2c;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    .daily-summary h3 {
+    .daily-summary h3, h2 {
       text-align: center;
       margin-bottom: 15px;
       font-size: 1.3rem;
       color: #00ffd5;
     }
-    .daily-summary p {
+    .daily-summary p, #filteredResult p, #monthlySummary p {
       background: #1e1e1e;
       padding: 8px 12px;
       border-left: 5px solid #00ffd5;
@@ -126,6 +126,16 @@
 
     <div class="daily-summary" id="dailySummary"></div>
 
+    <h2>📆 Filter by Date</h2>
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    <button onclick="filterByDate()">Filter</button>
+    <div id="filteredResult"></div>
+
+    <h2>📅 Monthly Summary</h2>
+    <button onclick="showMonthlySummary()">Show Monthly Summary</button>
+    <div id="monthlySummary"></div>
+
     <div class="print-pdf-buttons">
       <button onclick="window.print()">Print Result</button>
       <button onclick="downloadPDF()">Download PDF</button>
@@ -134,39 +144,13 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    let totalIncome = 0;
+    let totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
     let totalExpense = 0;
+    let expenseData = JSON.parse(localStorage.getItem('expenseData')) || [];
     const dailyData = {};
 
     function getToday() {
-      const today = new Date();
-      return today.toISOString().split('T')[0];
-    }
-
-    function saveData() {
-      const data = {
-        totalIncome,
-        totalExpense,
-        dailyData,
-        entries: document.getElementById("entries").innerHTML,
-        categoryOptions: Array.from(document.getElementById("category").options).map(opt => opt.outerHTML)
-      };
-      localStorage.setItem("budgetData", JSON.stringify(data));
-    }
-
-    function loadDeleteButtons() {
-      document.querySelectorAll(".entry-item button").forEach(btn => {
-        btn.onclick = function () {
-          const value = parseFloat(btn.parentElement.textContent.split(":")[1]);
-          totalExpense -= value;
-          const date = getToday();
-          if (dailyData[date]) dailyData[date].expense -= value;
-          btn.parentElement.remove();
-          updateDisplay();
-          updateDailySummary();
-          saveData();
-        };
-      });
+      return new Date().toISOString().split('T')[0];
     }
 
     function addIncome() {
@@ -174,9 +158,9 @@
       const value = parseFloat(incomeInput.value);
       if (!isNaN(value) && value > 0) {
         totalIncome += value;
+        localStorage.setItem('totalIncome', totalIncome);
         incomeInput.value = "";
         updateDisplay();
-        saveData();
       }
     }
 
@@ -184,54 +168,57 @@
       const amountInput = document.getElementById("amount");
       const category = document.getElementById("category").value;
       const value = parseFloat(amountInput.value);
+      const today = getToday();
 
       if (!isNaN(value) && value > 0) {
         totalExpense += value;
-
-        const today = getToday();
-        if (!dailyData[today]) {
-          dailyData[today] = { income: totalIncome, expense: 0 };
-        }
+        if (!dailyData[today]) dailyData[today] = { income: totalIncome, expense: 0 };
         dailyData[today].expense += value;
 
-        const entryDiv = document.getElementById("entries");
-        const entry = document.createElement("div");
-        entry.classList.add("entry-item");
+        const newEntry = { id: Date.now(), date: today, category, amount: value };
+        expenseData.push(newEntry);
+        localStorage.setItem('expenseData', JSON.stringify(expenseData));
 
-        const entryText = document.createElement("span");
-        entryText.textContent = `${category}: ${value} Tk`;
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.innerHTML = "<strong>Delete</strong>";
-        deleteBtn.title = "Delete";
-        deleteBtn.style.background = "#ff4444";
-        deleteBtn.style.color = "#fff";
-        deleteBtn.style.fontSize = "10px";
-        deleteBtn.style.fontWeight = "bold";
-        deleteBtn.style.padding = "2px 6px";
-        deleteBtn.style.border = "none";
-        deleteBtn.style.borderRadius = "3px";
-        deleteBtn.style.marginLeft = "10px";
-        deleteBtn.style.cursor = "pointer";
-
-        deleteBtn.onclick = function () {
-          totalExpense -= value;
-          dailyData[today].expense -= value;
-          entry.remove();
-          updateDisplay();
-          updateDailySummary();
-          saveData();
-        };
-
-        entry.appendChild(entryText);
-        entry.appendChild(deleteBtn);
-        entryDiv.appendChild(entry);
-
-        amountInput.value = "";
+        renderEntries();
         updateDisplay();
         updateDailySummary();
-        saveData();
+        amountInput.value = "";
       }
+    }
+
+    function renderEntries() {
+      totalExpense = 0;
+      const entryDiv = document.getElementById("entries");
+      entryDiv.innerHTML = "";
+
+      expenseData.forEach(entry => {
+        totalExpense += entry.amount;
+        const div = document.createElement("div");
+        div.className = "entry-item";
+
+        const text = document.createElement("span");
+        text.textContent = `${entry.date} - ${entry.category}: ${entry.amount} Tk`;
+
+        const btn = document.createElement("button");
+        btn.innerHTML = "<strong>Delete</strong>";
+        btn.style.background = "#ff4444";
+        btn.style.color = "#fff";
+        btn.style.fontSize = "10px";
+        btn.style.padding = "2px 6px";
+        btn.style.borderRadius = "3px";
+
+        btn.onclick = () => {
+          expenseData = expenseData.filter(e => e.id !== entry.id);
+          localStorage.setItem('expenseData', JSON.stringify(expenseData));
+          renderEntries();
+          updateDisplay();
+          updateDailySummary();
+        };
+
+        div.appendChild(text);
+        div.appendChild(btn);
+        entryDiv.appendChild(div);
+      });
     }
 
     function updateDisplay() {
@@ -242,40 +229,82 @@
 
     function updateDailySummary() {
       const summaryDiv = document.getElementById("dailySummary");
-      summaryDiv.innerHTML = "<h3>📅 Daily Summary</h3>";
-      for (const date in dailyData) {
-        const data = dailyData[date];
-        const line = document.createElement("p");
-        line.textContent = `${date} ➤ Khoroch: ${data.expense} Tk | Available Balance: ${data.income - data.expense} Tk`;
-        summaryDiv.appendChild(line);
+      summaryDiv.innerHTML = "<h3>\ud83d\udcc5 Daily Summary</h3>";
+      const summary = {};
+      expenseData.forEach(e => {
+        if (!summary[e.date]) summary[e.date] = 0;
+        summary[e.date] += e.amount;
+      });
+      for (const date in summary) {
+        const p = document.createElement("p");
+        p.textContent = `${date} ➤ Khoroch: ${summary[date]} Tk | Available: ${totalIncome - summary[date]} Tk`;
+        summaryDiv.appendChild(p);
       }
     }
 
     function resetData() {
       totalIncome = 0;
       totalExpense = 0;
-      document.getElementById("entries").innerHTML = "";
+      expenseData = [];
+      localStorage.removeItem('expenseData');
+      localStorage.removeItem('totalIncome');
+      renderEntries();
       updateDisplay();
       updateDailySummary();
-      saveData();
     }
 
     function resetDailySummary() {
-      for (let key in dailyData) delete dailyData[key];
       document.getElementById("dailySummary").innerHTML = "";
-      saveData();
     }
 
     function addCategory() {
-      const newCatInput = document.getElementById("newCategory");
-      const newCatValue = newCatInput.value.trim();
-      if (newCatValue !== "") {
-        const option = document.createElement("option");
-        option.value = newCatValue;
-        option.textContent = newCatValue;
-        document.getElementById("category").appendChild(option);
-        newCatInput.value = "";
-        saveData();
+      const input = document.getElementById("newCategory");
+      const value = input.value.trim();
+      if (value) {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = value;
+        document.getElementById("category").appendChild(opt);
+        input.value = "";
+      }
+    }
+
+    function filterByDate() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+      const filtered = expenseData.filter(e => e.date >= start && e.date <= end);
+
+      let total = 0;
+      const resultDiv = document.getElementById("filteredResult");
+      resultDiv.innerHTML = "";
+
+      filtered.forEach(e => {
+        total += e.amount;
+        const p = document.createElement("p");
+        p.textContent = `${e.date} ➤ ${e.category}: ${e.amount} Tk`;
+        resultDiv.appendChild(p);
+      });
+
+      const totalP = document.createElement("p");
+      totalP.style.fontWeight = "bold";
+      totalP.textContent = `Total from ${start} to ${end}: ${total} Tk`;
+      resultDiv.appendChild(totalP);
+    }
+
+    function showMonthlySummary() {
+      const monthly = {};
+      expenseData.forEach(e => {
+        const [year, month] = e.date.split("-");
+        const key = `${year}-${month}`;
+        if (!monthly[key]) monthly[key] = 0;
+        monthly[key] += e.amount;
+      });
+      const summaryDiv = document.getElementById("monthlySummary");
+      summaryDiv.innerHTML = "";
+      for (const month in monthly) {
+        const p = document.createElement("p");
+        p.textContent = `${month} ➤ Total Khoroch: ${monthly[month]} Tk`;
+        summaryDiv.appendChild(p);
       }
     }
 
@@ -291,25 +320,11 @@
       html2pdf().set(opt).from(element).save();
     }
 
-    window.onload = () => {
-      const saved = JSON.parse(localStorage.getItem("budgetData"));
-      if (saved) {
-        totalIncome = saved.totalIncome || 0;
-        totalExpense = saved.totalExpense || 0;
-        Object.assign(dailyData, saved.dailyData || {});
-        document.getElementById("entries").innerHTML = saved.entries || "";
-
-        const categorySelect = document.getElementById("category");
-        categorySelect.innerHTML = "";
-        (saved.categoryOptions || []).forEach(optHTML => {
-          categorySelect.insertAdjacentHTML("beforeend", optHTML);
-        });
-
-        updateDisplay();
-        updateDailySummary();
-        loadDeleteButtons();
-      }
-    };
+    window.onload = function () {
+      renderEntries();
+      updateDisplay();
+      updateDailySummary();
+    }
   </script>
 </body>
 </html>
