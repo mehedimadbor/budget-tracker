@@ -2,92 +2,187 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Budget Tracker</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #121212;
-      color: #ffffff;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    :root {
+      --bg: #121212;
+      --container-bg: #1f1f1f;
+      --input-bg: #2a2a2a;
+      --text: #ffffff;
+      --btn-bg: #ffffff;
+      --btn-text: #000000;
+      --accent: #00ffd5;
+      --danger: #ff4444;
+    }
+    body.light {
+      --bg: #f4f4f4;
+      --container-bg: #ffffff;
+      --input-bg: #e0e0e0;
+      --text: #222222;
+      --btn-bg: #222222;
+      --btn-text: #ffffff;
+      --accent: #0077cc;
+      --danger: #cc4444;
     }
     .container {
-      max-width: 600px;
+      max-width: 650px;
       margin: auto;
-      background: #1f1f1f;
+      background: var(--container-bg);
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #000;
+      box-shadow: 0 0 10px #0008;
     }
-    h1, h2 {
+    h1, h2, h3 {
       text-align: center;
+      margin-bottom: 15px;
     }
-    input, select, button {
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="number"], input[type="text"], select {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin: 6px 0 12px 0;
       border: none;
       border-radius: 5px;
-    }
-    input, select {
-      background: #2a2a2a;
-      color: #fff;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1rem;
     }
     button {
-      background: #ffffff;
-      color: #000;
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 5px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #d1d1d1;
+      background: var(--accent);
+      color: var(--text);
+    }
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-danger:hover {
+      background: #a33333;
+    }
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .flex-row > * {
+      flex: 1 1 150px;
     }
     .entry-list {
       margin-top: 20px;
+      max-height: 220px;
+      overflow-y: auto;
     }
     .entry-item {
-      background: #2a2a2a;
+      background: var(--input-bg);
       padding: 10px;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       border-radius: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 0.95rem;
+    }
+    .entry-item span {
+      flex: 1;
+      word-break: break-word;
+    }
+    .entry-item button {
+      width: auto;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      margin-left: 10px;
+      border-radius: 3px;
     }
     .summary {
       margin-top: 20px;
       font-weight: bold;
       text-align: center;
+      font-size: 1.1rem;
+      line-height: 1.4;
+      background: var(--input-bg);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .daily-summary {
+      margin-top: 25px;
+      padding: 20px;
+      background: var(--input-bg);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-size: 0.95rem;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .daily-summary h3 {
+      color: var(--accent);
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    .daily-summary p {
+      background: var(--container-bg);
+      padding: 10px 15px;
+      border-left: 6px solid var(--accent);
+      border-radius: 6px;
+      margin: 8px 0;
+      white-space: pre-wrap;
     }
     .print-pdf-buttons {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       margin-top: 20px;
+      flex-wrap: wrap;
     }
     .print-pdf-buttons button {
-      flex: 1;
+      flex: 1 1 45%;
     }
-    .daily-summary, #filteredResult, #monthlySummary {
-      margin-top: 20px;
-      padding: 15px;
-      background: #2c2c2c;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-    .daily-summary h3, h2 {
+    .dark-light-toggle {
+      margin-bottom: 20px;
       text-align: center;
-      margin-bottom: 15px;
-      font-size: 1.3rem;
-      color: #00ffd5;
     }
-    .daily-summary p, #filteredResult p, #monthlySummary p {
-      background: #1e1e1e;
-      padding: 8px 12px;
-      border-left: 5px solid #00ffd5;
-      border-radius: 5px;
-      margin: 6px 0;
-      font-size: 0.95rem;
+    .dark-light-toggle button {
+      width: auto;
+      padding: 8px 18px;
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .dark-light-toggle button:hover {
+      background: var(--btn-bg);
+      color: var(--btn-text);
     }
   </style>
 </head>
@@ -95,236 +190,422 @@
   <div class="container" id="tracker">
     <h1>Budget Tracker</h1>
 
+    <div class="dark-light-toggle">
+      <button id="toggleThemeBtn">Switch to Light Mode</button>
+    </div>
+
     <label for="income">Balance Add Koro:</label>
-    <input type="number" id="income" placeholder="Ex: 20000" />
-    <button onclick="addIncome()">Balance Add</button>
+    <input type="number" id="income" placeholder="Ex: 20000" min="0" />
+    <button id="addIncomeBtn">Balance Add</button>
 
     <label for="amount">Khorocher Amount:</label>
-    <input type="number" id="amount" placeholder="Ex: 100" />
+    <input type="number" id="amount" placeholder="Ex: 100" min="0" />
 
     <label for="category">Category:</label>
-    <select id="category">
-      <option value="Khawa">Khawa</option>
-      <option value="Ghari Vara">Ghari Vara</option>
-      <option value="Onno Khoroch">Onno Khoroch</option>
-    </select>
+    <select id="category"></select>
 
     <input type="text" id="newCategory" placeholder="Notun Category (optional)" />
-    <button onclick="addCategory()">Notun Category Add</button>
+    <button id="addCategoryBtn">Notun Category Add</button>
 
-    <button onclick="addExpense()">Khoroch Add</button>
-    <button onclick="resetData()" style="background:#ff4444;color:white">Reset All</button>
-    <button onclick="resetDailySummary()" style="background:#555;color:white">Reset Daily Summary</button>
+    <button id="addExpenseBtn">Khoroch Add</button>
 
-    <div class="entry-list" id="entries"></div>
+    <div class="flex-row" style="margin-top:10px;">
+      <button id="resetAllBtn" class="btn-danger">Reset All</button>
+      <button id="resetDailyBtn" style="background:#555; color:#fff;">Reset Daily Summary</button>
+    </div>
 
-    <div class="summary">
+    <label for="filterCategory" style="margin-top:20px;">Filter by Category:</label>
+    <select id="filterCategory">
+      <option value="all">All Categories</option>
+    </select>
+
+    <div class="summary" id="summaryBox">
       <p>Total Balance: <span id="totalIncome">0</span> Tk</p>
       <p>Total Khoroch: <span id="totalExpense">0</span> Tk</p>
       <p>Available Balance: <span id="balance">0</span> Tk</p>
     </div>
 
+    <div class="entry-list" id="entries"></div>
+
     <div class="daily-summary" id="dailySummary"></div>
 
-    <h2>📆 Filter by Date</h2>
-    <input type="date" id="startDate">
-    <input type="date" id="endDate">
-    <button onclick="filterByDate()">Filter</button>
-    <div id="filteredResult"></div>
-
-    <h2>📅 Monthly Summary</h2>
-    <button onclick="showMonthlySummary()">Show Monthly Summary</button>
-    <div id="monthlySummary"></div>
-
     <div class="print-pdf-buttons">
-      <button onclick="window.print()">Print Result</button>
-      <button onclick="downloadPDF()">Download PDF</button>
+      <button id="printBtn">Print Result</button>
+      <button id="downloadPdfBtn">Download PDF</button>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    let totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
-    let totalExpense = 0;
-    let expenseData = JSON.parse(localStorage.getItem('expenseData')) || [];
-    const dailyData = {};
+    // Elements
+    const incomeInput = document.getElementById('income');
+    const amountInput = document.getElementById('amount');
+    const categorySelect = document.getElementById('category');
+    const newCategoryInput = document.getElementById('newCategory');
+    const addIncomeBtn = document.getElementById('addIncomeBtn');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const addExpenseBtn = document.getElementById('addExpenseBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const resetDailyBtn = document.getElementById('resetDailyBtn');
+    const entriesDiv = document.getElementById('entries');
+    const totalIncomeSpan = document.getElementById('totalIncome');
+    const totalExpenseSpan = document.getElementById('totalExpense');
+    const balanceSpan = document.getElementById('balance');
+    const dailySummaryDiv = document.getElementById('dailySummary');
+    const filterCategorySelect = document.getElementById('filterCategory');
+    const printBtn = document.getElementById('printBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const toggleThemeBtn = document.getElementById('toggleThemeBtn');
 
+    // Data object with defaults
+    let data = {
+      totalIncome: 0,
+      totalExpense: 0,
+      categories: ['Khawa', 'Ghari Vara', 'Onno Khoroch'],
+      expenses: [], // Each: {id, amount, category, date}
+    };
+
+    // Load data from localStorage
+    function loadData() {
+      const saved = localStorage.getItem('budgetTrackerData');
+      if (saved) {
+        try {
+          data = JSON.parse(saved);
+          // If categories missing, add defaults
+          if (!data.categories || !Array.isArray(data.categories) || data.categories.length === 0) {
+            data.categories = ['Khawa', 'Ghari Vara', 'Onno Khoroch'];
+          }
+          if (!data.expenses || !Array.isArray(data.expenses)) {
+            data.expenses = [];
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+    }
+
+    // Save data to localStorage
+    function saveData() {
+      localStorage.setItem('budgetTrackerData', JSON.stringify(data));
+    }
+
+    // Utility: get today's date string YYYY-MM-DD
     function getToday() {
       return new Date().toISOString().split('T')[0];
     }
 
-    function addIncome() {
-      const incomeInput = document.getElementById("income");
-      const value = parseFloat(incomeInput.value);
-      if (!isNaN(value) && value > 0) {
-        totalIncome += value;
-        localStorage.setItem('totalIncome', totalIncome);
-        incomeInput.value = "";
-        updateDisplay();
-      }
+    // Render category options for selects
+    function renderCategories() {
+      categorySelect.innerHTML = '';
+      filterCategorySelect.innerHTML = '<option value="all">All Categories</option>';
+      data.categories.forEach(cat => {
+        const opt1 = document.createElement('option');
+        opt1.value = cat;
+        opt1.textContent = cat;
+        categorySelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = cat;
+        opt2.textContent = cat;
+        filterCategorySelect.appendChild(opt2);
+      });
     }
 
-    function addExpense() {
-      const amountInput = document.getElementById("amount");
-      const category = document.getElementById("category").value;
-      const value = parseFloat(amountInput.value);
-      const today = getToday();
-
-      if (!isNaN(value) && value > 0) {
-        totalExpense += value;
-        if (!dailyData[today]) dailyData[today] = { income: totalIncome, expense: 0 };
-        dailyData[today].expense += value;
-
-        const newEntry = { id: Date.now(), date: today, category, amount: value };
-        expenseData.push(newEntry);
-        localStorage.setItem('expenseData', JSON.stringify(expenseData));
-
-        renderEntries();
-        updateDisplay();
-        updateDailySummary();
-        amountInput.value = "";
-      }
-    }
-
+    // Render all expense entries based on filter
     function renderEntries() {
-      totalExpense = 0;
-      const entryDiv = document.getElementById("entries");
-      entryDiv.innerHTML = "";
+      entriesDiv.innerHTML = '';
+      const filterCat = filterCategorySelect.value;
 
-      expenseData.forEach(entry => {
-        totalExpense += entry.amount;
-        const div = document.createElement("div");
-        div.className = "entry-item";
+      // Sort expenses by date descending (newest first)
+      const expensesToShow = data.expenses
+        .filter(exp => filterCat === 'all' || exp.category === filterCat)
+        .sort((a, b) => b.date.localeCompare(a.date));
 
-        const text = document.createElement("span");
-        text.textContent = `${entry.date} - ${entry.category}: ${entry.amount} Tk`;
+      if (expensesToShow.length === 0) {
+        entriesDiv.innerHTML = '<p style="text-align:center;opacity:0.6;">No expenses to show.</p>';
+        return;
+      }
 
-        const btn = document.createElement("button");
-        btn.innerHTML = "<strong>Delete</strong>";
-        btn.style.background = "#ff4444";
-        btn.style.color = "#fff";
-        btn.style.fontSize = "10px";
-        btn.style.padding = "2px 6px";
-        btn.style.borderRadius = "3px";
+      expensesToShow.forEach(exp => {
+        const div = document.createElement('div');
+        div.classList.add('entry-item');
 
-        btn.onclick = () => {
-          expenseData = expenseData.filter(e => e.id !== entry.id);
-          localStorage.setItem('expenseData', JSON.stringify(expenseData));
-          renderEntries();
-          updateDisplay();
-          updateDailySummary();
+        const dateStr = new Date(exp.date).toLocaleDateString();
+
+        const span = document.createElement('span');
+        span.textContent = `${dateStr} — ${exp.category}: ${exp.amount} Tk`;
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.classList.add('btn-danger');
+        delBtn.title = 'Delete this expense';
+
+        delBtn.onclick = () => {
+          if (confirm('Are you sure you want to delete this expense?')) {
+            // Remove from data
+            data.expenses = data.expenses.filter(e => e.id !== exp.id);
+            recalcTotals();
+            saveData();
+            renderEntries();
+            renderSummary();
+            renderDailySummary();
+          }
         };
 
-        div.appendChild(text);
-        div.appendChild(btn);
-        entryDiv.appendChild(div);
+        div.appendChild(span);
+        div.appendChild(delBtn);
+
+        entriesDiv.appendChild(div);
       });
     }
 
-    function updateDisplay() {
-      document.getElementById("totalIncome").textContent = totalIncome;
-      document.getElementById("totalExpense").textContent = totalExpense;
-      document.getElementById("balance").textContent = totalIncome - totalExpense;
+    // Recalculate total income and expense from data
+    function recalcTotals() {
+      // totalIncome is sum of all incomes (we keep it manually, but can calculate from added income entries if you add that feature)
+      // For now, keep totalIncome from data, totalExpense sum of expenses
+
+      let expenseSum = 0;
+      data.expenses.forEach(e => { expenseSum += e.amount; });
+      data.totalExpense = expenseSum;
     }
 
-    function updateDailySummary() {
-      const summaryDiv = document.getElementById("dailySummary");
-      summaryDiv.innerHTML = "<h3>\ud83d\udcc5 Daily Summary</h3>";
-      const summary = {};
-      expenseData.forEach(e => {
-        if (!summary[e.date]) summary[e.date] = 0;
-        summary[e.date] += e.amount;
-      });
-      for (const date in summary) {
-        const p = document.createElement("p");
-        p.textContent = `${date} ➤ Khoroch: ${summary[date]} Tk | Available: ${totalIncome - summary[date]} Tk`;
-        summaryDiv.appendChild(p);
+    // Render total summary
+    function renderSummary() {
+      totalIncomeSpan.textContent = data.totalIncome.toFixed(2);
+      totalExpenseSpan.textContent = data.totalExpense.toFixed(2);
+      balanceSpan.textContent = (data.totalIncome - data.totalExpense).toFixed(2);
+    }
+
+    // Render daily summary grouped by date and category with totals
+    function renderDailySummary() {
+      dailySummaryDiv.innerHTML = '<h3>📊 Daily Expenses Summary</h3>';
+
+      if (data.expenses.length === 0) {
+        dailySummaryDiv.innerHTML += '<p style="text-align:center;opacity:0.6;">No expenses recorded yet.</p>';
+        return;
       }
+
+      // Group expenses by date, then by category
+      const grouped = {};
+
+      data.expenses.forEach(exp => {
+        if (!grouped[exp.date]) grouped[exp.date] = {};
+        if (!grouped[exp.date][exp.category]) grouped[exp.date][exp.category] = 0;
+        grouped[exp.date][exp.category] += exp.amount;
+      });
+
+      // Sort dates descending
+      const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+      dates.forEach(date => {
+        let dailyTotal = 0;
+        const catObj = grouped[date];
+        const dateFormatted = new Date(date).toLocaleDateString();
+
+        let detailsText = '';
+        for (const cat in catObj) {
+          const amt = catObj[cat];
+          dailyTotal += amt;
+          detailsText += `  • ${cat}: ${amt.toFixed(2)} Tk\n`;
+        }
+
+        // Available balance after expenses till this date (approximate)
+        // Here, just show total income - total expense so far (you can improve by tracking incomes by date)
+        const balanceAfter = data.totalIncome - data.totalExpense;
+
+        const p = document.createElement('p');
+        p.textContent = `${dateFormatted} ➤ Total Khorocher: ${dailyTotal.toFixed(2)} Tk\n${detailsText}Available Balance: ${balanceAfter.toFixed(2)} Tk`;
+        dailySummaryDiv.appendChild(p);
+      });
     }
 
-    function resetData() {
-      totalIncome = 0;
-      totalExpense = 0;
-      expenseData = [];
-      localStorage.removeItem('expenseData');
-      localStorage.removeItem('totalIncome');
-      renderEntries();
-      updateDisplay();
-      updateDailySummary();
+    // Add income function
+    function addIncome() {
+      const val = parseFloat(incomeInput.value);
+      if (isNaN(val) || val <= 0) {
+        alert('Please enter a valid positive income amount.');
+        return;
+      }
+      data.totalIncome += val;
+      incomeInput.value = '';
+      saveData();
+      renderSummary();
+      renderDailySummary();
     }
 
-    function resetDailySummary() {
-      document.getElementById("dailySummary").innerHTML = "";
-    }
-
+    // Add new category
     function addCategory() {
-      const input = document.getElementById("newCategory");
-      const value = input.value.trim();
-      if (value) {
-        const opt = document.createElement("option");
-        opt.value = value;
-        opt.textContent = value;
-        document.getElementById("category").appendChild(opt);
-        input.value = "";
+      const newCat = newCategoryInput.value.trim();
+      if (newCat === '') {
+        alert('Please enter a category name.');
+        return;
       }
-    }
-
-    function filterByDate() {
-      const start = document.getElementById("startDate").value;
-      const end = document.getElementById("endDate").value;
-      const filtered = expenseData.filter(e => e.date >= start && e.date <= end);
-
-      let total = 0;
-      const resultDiv = document.getElementById("filteredResult");
-      resultDiv.innerHTML = "";
-
-      filtered.forEach(e => {
-        total += e.amount;
-        const p = document.createElement("p");
-        p.textContent = `${e.date} ➤ ${e.category}: ${e.amount} Tk`;
-        resultDiv.appendChild(p);
-      });
-
-      const totalP = document.createElement("p");
-      totalP.style.fontWeight = "bold";
-      totalP.textContent = `Total from ${start} to ${end}: ${total} Tk`;
-      resultDiv.appendChild(totalP);
-    }
-
-    function showMonthlySummary() {
-      const monthly = {};
-      expenseData.forEach(e => {
-        const [year, month] = e.date.split("-");
-        const key = `${year}-${month}`;
-        if (!monthly[key]) monthly[key] = 0;
-        monthly[key] += e.amount;
-      });
-      const summaryDiv = document.getElementById("monthlySummary");
-      summaryDiv.innerHTML = "";
-      for (const month in monthly) {
-        const p = document.createElement("p");
-        p.textContent = `${month} ➤ Total Khoroch: ${monthly[month]} Tk`;
-        summaryDiv.appendChild(p);
+      if (data.categories.includes(newCat)) {
+        alert('Category already exists.');
+        return;
       }
-    }
-
-    function downloadPDF() {
-      const element = document.getElementById("tracker");
-      const opt = {
-        margin: 0.5,
-        filename: 'budget-report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
-    }
-
-    window.onload = function () {
+      data.categories.push(newCat);
+      newCategoryInput.value = '';
+      saveData();
+      renderCategories();
       renderEntries();
-      updateDisplay();
-      updateDailySummary();
     }
+
+    // Generate unique ID for expense entries
+    function generateID() {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Add expense
+    function addExpense() {
+      const val = parseFloat(amountInput.value);
+      if (isNaN(val) || val <= 0) {
+        alert('Please enter a valid positive expense amount.');
+        return;
+      }
+      const cat = categorySelect.value;
+      if (!cat) {
+        alert('Please select a category.');
+        return;
+      }
+      const today = getToday();
+
+      const newExpense = {
+        id: generateID(),
+        amount: val,
+        category: cat,
+        date: today
+      };
+      data.expenses.push(newExpense);
+      amountInput.value = '';
+      saveData();
+      recalcTotals();
+      renderSummary();
+      renderEntries();
+      renderDailySummary();
+    }
+
+    // Reset all data (income, expenses, categories reset to defaults)
+    function resetAll() {
+      if (!confirm('Are you sure? This will erase all data and reset categories!')) return;
+      data = {
+        totalIncome: 0,
+        totalExpense: 0,
+        categories: ['Khawa', 'Ghari Vara', 'Onno Khoroch'],
+        expenses: [],
+      };
+      saveData();
+      renderAll();
+    }
+
+    // Reset daily summary (remove expenses only, keep income & categories)
+    function resetDailySummary() {
+      if (!confirm('Are you sure you want to clear all expense records?')) return;
+      data.expenses = [];
+      data.totalExpense = 0;
+      saveData();
+      renderAll();
+    }
+
+    // Render everything
+    function renderAll() {
+      renderCategories();
+      renderEntries();
+      renderSummary();
+      renderDailySummary();
+    }
+
+    // Filter change handler
+    filterCategorySelect.addEventListener('change', renderEntries);
+
+    // Dark/light theme toggle
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light');
+        toggleThemeBtn.textContent = 'Switch to Dark Mode';
+      } else {
+        document.body.classList.remove('light');
+        toggleThemeBtn.textContent = 'Switch to Light Mode';
+      }
+    }
+    function toggleTheme() {
+      if (document.body.classList.contains('light')) {
+        document.body.classList.remove('light');
+        localStorage.setItem('theme', 'dark');
+        toggleThemeBtn.textContent = 'Switch to Light Mode';
+      } else {
+        document.body.classList.add('light');
+        localStorage.setItem('theme', 'light');
+        toggleThemeBtn.textContent = 'Switch to Dark Mode';
+      }
+    }
+
+    // Print only the daily summary report
+    function printReport() {
+      const content = dailySummaryDiv.innerHTML;
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Daily Summary Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h3 { color: #0077cc; }
+              p {
+                background: #f4f4f4;
+                border-left: 6px solid #0077cc;
+                padding: 10px 15px;
+                white-space: pre-wrap;
+                border-radius: 6px;
+                margin-bottom: 12px;
+              }
+            </style>
+          </head>
+          <body>
+            ${content}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+
+    // Download PDF of daily summary
+    function downloadPdf() {
+      // Clone dailySummaryDiv to avoid style issues
+      const clone = dailySummaryDiv.cloneNode(true);
+      // Hide elements not needed or adjust style if needed
+      const opt = {
+        margin:       1,
+        filename:     'Daily_Summary_Report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(clone).save();
+    }
+
+    // Event listeners
+    addIncomeBtn.addEventListener('click', addIncome);
+    addCategoryBtn.addEventListener('click', addCategory);
+    addExpenseBtn.addEventListener('click', () => {
+      addExpense();
+      // After adding expense, reset filter to all and show all entries
+      filterCategorySelect.value = 'all';
+    });
+    resetAllBtn.addEventListener('click', resetAll);
+    resetDailyBtn.addEventListener('click', resetDailySummary);
+    printBtn.addEventListener('click', printReport);
+    downloadPdfBtn.addEventListener('click', downloadPdf);
+    toggleThemeBtn.addEventListener('click', toggleTheme);
+
+    // Initialization
+    loadData();
+    renderAll();
+    loadTheme();
   </script>
 </body>
 </html>
