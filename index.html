@@ -1,611 +1,247 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Budget Tracker</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
-      transition: background 0.3s, color 0.3s;
-    }
-    :root {
-      --bg: #121212;
-      --container-bg: #1f1f1f;
-      --input-bg: #2a2a2a;
-      --text: #ffffff;
-      --btn-bg: #ffffff;
-      --btn-text: #000000;
-      --accent: #00ffd5;
-      --danger: #ff4444;
-    }
-    body.light {
-      --bg: #f4f4f4;
-      --container-bg: #ffffff;
-      --input-bg: #e0e0e0;
-      --text: #222222;
-      --btn-bg: #222222;
-      --btn-text: #ffffff;
-      --accent: #0077cc;
-      --danger: #cc4444;
-    }
-    .container {
-      max-width: 650px;
-      margin: auto;
-      background: var(--container-bg);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #0008;
-    }
-    h1, h2, h3 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input[type="number"], input[type="text"], select {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0 12px 0;
-      border: none;
-      border-radius: 5px;
-      background: var(--input-bg);
-      color: var(--text);
-      font-size: 1rem;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 5px;
-      background: var(--btn-bg);
-      color: var(--btn-text);
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: var(--accent);
-      color: var(--text);
-    }
-    .btn-danger {
-      background: var(--danger);
-      color: #fff;
-    }
-    .btn-danger:hover {
-      background: #a33333;
-    }
-    .flex-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .flex-row > * {
-      flex: 1 1 150px;
-    }
-    .entry-list {
-      margin-top: 20px;
-      max-height: 220px;
-      overflow-y: auto;
-    }
-    .entry-item {
-      background: var(--input-bg);
-      padding: 10px;
-      margin-bottom: 6px;
-      border-radius: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
-    }
-    .entry-item span {
-      flex: 1;
-      word-break: break-word;
-    }
-    .entry-item button {
-      width: auto;
-      padding: 5px 10px;
-      font-size: 0.8rem;
-      margin-left: 10px;
-      border-radius: 3px;
-    }
-    .summary {
-      margin-top: 20px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 1.1rem;
-      line-height: 1.4;
-      background: var(--input-bg);
-      padding: 15px;
-      border-radius: 10px;
-    }
-    .daily-summary {
-      margin-top: 25px;
-      padding: 20px;
-      background: var(--input-bg);
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      font-size: 0.95rem;
-      max-height: 320px;
-      overflow-y: auto;
-    }
-    .daily-summary h3 {
-      color: var(--accent);
-      margin-bottom: 15px;
-      font-size: 1.3rem;
-      text-align: center;
-    }
-    .daily-summary p {
-      background: var(--container-bg);
-      padding: 10px 15px;
-      border-left: 6px solid var(--accent);
-      border-radius: 6px;
-      margin: 8px 0;
-      white-space: pre-wrap;
-    }
-    .print-pdf-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    .print-pdf-buttons button {
-      flex: 1 1 45%;
-    }
-    .dark-light-toggle {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .dark-light-toggle button {
-      width: auto;
-      padding: 8px 18px;
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: 600;
-      border-radius: 20px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .dark-light-toggle button:hover {
-      background: var(--btn-bg);
-      color: var(--btn-text);
-    }
-  </style>
-</head>
-<body>
-  <div class="container" id="tracker">
-    <h1>Budget Tracker</h1>
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-    <div class="dark-light-toggle">
-      <button id="toggleThemeBtn">Switch to Light Mode</button>
+export default function MoneyManagerApp() {
+  const [transactions, setTransactions] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [type, setType] = useState("expense");
+
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+
+  const [savings, setSavings] = useState(0);
+  const [saveAmount, setSaveAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // LOAD
+  useEffect(() => {
+    const t = localStorage.getItem("transactions");
+    const c = localStorage.getItem("categories");
+    const s = localStorage.getItem("savings");
+
+    if (t) setTransactions(JSON.parse(t));
+    if (c) setCategories(JSON.parse(c));
+    if (s) setSavings(JSON.parse(s));
+  }, []);
+
+  // SAVE
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    localStorage.setItem("categories", JSON.stringify(categories));
+    localStorage.setItem("savings", JSON.stringify(savings));
+  }, [transactions, categories, savings]);
+
+  // BALANCE
+  const income = transactions
+    .filter(t => t.type === "income")
+    .reduce((a, b) => a + Number(b.amount), 0);
+
+  const expense = transactions
+    .filter(t => t.type === "expense")
+    .reduce((a, b) => a + Number(b.amount), 0);
+
+  const balance = income - expense;
+
+  const addCategory = () => {
+    const cat = newCategory.trim();
+    if (!cat) return;
+    if (!categories.includes(cat)) {
+      setCategories(prev => [...prev, cat]);
+    }
+    setNewCategory("");
+  };
+
+  const addTransaction = () => {
+    const amt = Number(amount);
+    if (!amt || !selectedCategory) return;
+
+    setTransactions(prev => [...prev, {
+      amount: amt,
+      type,
+      category: selectedCategory,
+      date: new Date().toISOString()
+    }]);
+
+    setAmount("");
+    setSelectedCategory("");
+  };
+
+  const addToSavings = () => {
+    const amt = Number(saveAmount);
+    if (!amt || amt <= 0 || amt > balance) return;
+
+    setSavings(prev => prev + amt);
+    setTransactions(prev => [...prev, {
+      amount: amt,
+      type: "expense",
+      category: "Transfer to Savings",
+      date: new Date().toISOString()
+    }]);
+
+    setSaveAmount("");
+  };
+
+  const withdrawFromSavings = () => {
+    const amt = Number(withdrawAmount);
+    if (!amt || amt <= 0 || amt > savings) return;
+
+    setSavings(prev => prev - amt);
+    setTransactions(prev => [...prev, {
+      amount: amt,
+      type: "income",
+      category: "From Savings",
+      date: new Date().toISOString()
+    }]);
+
+    setWithdrawAmount("");
+  };
+
+  const filteredTransactions = transactions.filter(t => {
+    if (!selectedMonth) return true;
+    const d = new Date(t.date);
+    const [y, m] = selectedMonth.split("-");
+    return d.getFullYear() === Number(y) && d.getMonth() + 1 === Number(m);
+  });
+
+  const clearAll = () => {
+    setTransactions([]);
+    setCategories([]);
+    setSavings(0);
+    localStorage.clear();
+    setShowConfirm(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-black p-3 sm:p-6 flex justify-center">
+
+      <div className="w-full max-w-md sm:max-w-2xl space-y-4">
+
+        {/* TOP */}
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">Money Manager</h1>
+            <p className="text-sm sm:text-base">Main Balance: {balance} tk</p>
+            <p className="text-sm sm:text-base">Savings: {savings} tk</p>
+          </div>
+
+          <Button className="w-full sm:w-auto" onClick={() => setShowConfirm(true)}>
+            Ops
+          </Button>
+        </div>
+
+        {/* MONTH */}
+        <Card>
+          <CardContent className="p-3">
+            <Input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            />
+          </CardContent>
+        </Card>
+
+        {/* CATEGORY */}
+        <Card>
+          <CardContent className="p-3 space-y-2">
+            <Input
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="New Category"
+            />
+            <Button className="w-full" onClick={addCategory}>Add Category</Button>
+          </CardContent>
+        </Card>
+
+        {/* TRANSACTION */}
+        <Card>
+          <CardContent className="p-3 space-y-2">
+            <Input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Amount"
+            />
+
+            <select
+              className="w-full border p-2 rounded"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">Select Category</option>
+              {categories.map((c, i) => (
+                <option key={i} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              className="w-full border p-2 rounded"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+
+            <Button className="w-full" onClick={addTransaction}>Add</Button>
+          </CardContent>
+        </Card>
+
+        {/* SAVINGS */}
+        <Card>
+          <CardContent className="p-3 space-y-2">
+            <Input
+              type="number"
+              value={saveAmount}
+              onChange={(e) => setSaveAmount(e.target.value)}
+              placeholder="Transfer to Savings"
+            />
+            <Button className="w-full" onClick={addToSavings}>Send to Savings</Button>
+
+            <Input
+              type="number"
+              value={withdrawAmount}
+              onChange={(e) => setWithdrawAmount(e.target.value)}
+              placeholder="Withdraw Savings"
+            />
+            <Button className="w-full" onClick={withdrawFromSavings}>Withdraw</Button>
+          </CardContent>
+        </Card>
+
+        {/* TRANSACTIONS */}
+        <Card>
+          <CardContent className="p-3">
+            <h2 className="font-bold mb-2">Transactions</h2>
+            <div className="space-y-1">
+              {filteredTransactions.map((t, i) => (
+                <div key={i} className="flex justify-between text-sm border-b py-1">
+                  <span>{t.category}</span>
+                  <span>{t.type === "income" ? "+" : "-"}{t.amount}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CONFIRM */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+            <div className="bg-white p-4 rounded w-full max-w-sm">
+              <p className="mb-3">Clear all data?</p>
+              <div className="flex gap-2">
+                <button onClick={clearAll} className="bg-red-500 text-white px-3 py-2 flex-1 rounded">Yes</button>
+                <button onClick={() => setShowConfirm(false)} className="bg-gray-200 px-3 py-2 flex-1 rounded">No</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
-
-    <label for="income">Balance Add Koro:</label>
-    <input type="number" id="income" placeholder="Ex: 20000" min="0" />
-    <button id="addIncomeBtn">Balance Add</button>
-
-    <label for="amount">Khorocher Amount:</label>
-    <input type="number" id="amount" placeholder="Ex: 100" min="0" />
-
-    <label for="category">Category:</label>
-    <select id="category"></select>
-
-    <input type="text" id="newCategory" placeholder="Notun Category (optional)" />
-    <button id="addCategoryBtn">Notun Category Add</button>
-
-    <button id="addExpenseBtn">Khoroch Add</button>
-
-    <div class="flex-row" style="margin-top:10px;">
-      <button id="resetAllBtn" class="btn-danger">Reset All</button>
-      <button id="resetDailyBtn" style="background:#555; color:#fff;">Reset Daily Summary</button>
-    </div>
-
-    <label for="filterCategory" style="margin-top:20px;">Filter by Category:</label>
-    <select id="filterCategory">
-      <option value="all">All Categories</option>
-    </select>
-
-    <div class="summary" id="summaryBox">
-      <p>Total Balance: <span id="totalIncome">0</span> Tk</p>
-      <p>Total Khoroch: <span id="totalExpense">0</span> Tk</p>
-      <p>Available Balance: <span id="balance">0</span> Tk</p>
-    </div>
-
-    <div class="entry-list" id="entries"></div>
-
-    <div class="daily-summary" id="dailySummary"></div>
-
-    <div class="print-pdf-buttons">
-      <button id="printBtn">Print Result</button>
-      <button id="downloadPdfBtn">Download PDF</button>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script>
-    // Elements
-    const incomeInput = document.getElementById('income');
-    const amountInput = document.getElementById('amount');
-    const categorySelect = document.getElementById('category');
-    const newCategoryInput = document.getElementById('newCategory');
-    const addIncomeBtn = document.getElementById('addIncomeBtn');
-    const addCategoryBtn = document.getElementById('addCategoryBtn');
-    const addExpenseBtn = document.getElementById('addExpenseBtn');
-    const resetAllBtn = document.getElementById('resetAllBtn');
-    const resetDailyBtn = document.getElementById('resetDailyBtn');
-    const entriesDiv = document.getElementById('entries');
-    const totalIncomeSpan = document.getElementById('totalIncome');
-    const totalExpenseSpan = document.getElementById('totalExpense');
-    const balanceSpan = document.getElementById('balance');
-    const dailySummaryDiv = document.getElementById('dailySummary');
-    const filterCategorySelect = document.getElementById('filterCategory');
-    const printBtn = document.getElementById('printBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const toggleThemeBtn = document.getElementById('toggleThemeBtn');
-
-    // Data object with defaults
-    let data = {
-      totalIncome: 0,
-      totalExpense: 0,
-      categories: ['Khawa', 'Ghari Vara', 'Onno Khoroch'],
-      expenses: [], // Each: {id, amount, category, date}
-    };
-
-    // Load data from localStorage
-    function loadData() {
-      const saved = localStorage.getItem('budgetTrackerData');
-      if (saved) {
-        try {
-          data = JSON.parse(saved);
-          // If categories missing, add defaults
-          if (!data.categories || !Array.isArray(data.categories) || data.categories.length === 0) {
-            data.categories = ['Khawa', 'Ghari Vara', 'Onno Khoroch'];
-          }
-          if (!data.expenses || !Array.isArray(data.expenses)) {
-            data.expenses = [];
-          }
-        } catch {
-          // Ignore parse errors
-        }
-      }
-    }
-
-    // Save data to localStorage
-    function saveData() {
-      localStorage.setItem('budgetTrackerData', JSON.stringify(data));
-    }
-
-    // Utility: get today's date string YYYY-MM-DD
-    function getToday() {
-      return new Date().toISOString().split('T')[0];
-    }
-
-    // Render category options for selects
-    function renderCategories() {
-      categorySelect.innerHTML = '';
-      filterCategorySelect.innerHTML = '<option value="all">All Categories</option>';
-      data.categories.forEach(cat => {
-        const opt1 = document.createElement('option');
-        opt1.value = cat;
-        opt1.textContent = cat;
-        categorySelect.appendChild(opt1);
-
-        const opt2 = document.createElement('option');
-        opt2.value = cat;
-        opt2.textContent = cat;
-        filterCategorySelect.appendChild(opt2);
-      });
-    }
-
-    // Render all expense entries based on filter
-    function renderEntries() {
-      entriesDiv.innerHTML = '';
-      const filterCat = filterCategorySelect.value;
-
-      // Sort expenses by date descending (newest first)
-      const expensesToShow = data.expenses
-        .filter(exp => filterCat === 'all' || exp.category === filterCat)
-        .sort((a, b) => b.date.localeCompare(a.date));
-
-      if (expensesToShow.length === 0) {
-        entriesDiv.innerHTML = '<p style="text-align:center;opacity:0.6;">No expenses to show.</p>';
-        return;
-      }
-
-      expensesToShow.forEach(exp => {
-        const div = document.createElement('div');
-        div.classList.add('entry-item');
-
-        const dateStr = new Date(exp.date).toLocaleDateString();
-
-        const span = document.createElement('span');
-        span.textContent = `${dateStr} — ${exp.category}: ${exp.amount} Tk`;
-
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete';
-        delBtn.classList.add('btn-danger');
-        delBtn.title = 'Delete this expense';
-
-        delBtn.onclick = () => {
-          if (confirm('Are you sure you want to delete this expense?')) {
-            // Remove from data
-            data.expenses = data.expenses.filter(e => e.id !== exp.id);
-            recalcTotals();
-            saveData();
-            renderEntries();
-            renderSummary();
-            renderDailySummary();
-          }
-        };
-
-        div.appendChild(span);
-        div.appendChild(delBtn);
-
-        entriesDiv.appendChild(div);
-      });
-    }
-
-    // Recalculate total income and expense from data
-    function recalcTotals() {
-      // totalIncome is sum of all incomes (we keep it manually, but can calculate from added income entries if you add that feature)
-      // For now, keep totalIncome from data, totalExpense sum of expenses
-
-      let expenseSum = 0;
-      data.expenses.forEach(e => { expenseSum += e.amount; });
-      data.totalExpense = expenseSum;
-    }
-
-    // Render total summary
-    function renderSummary() {
-      totalIncomeSpan.textContent = data.totalIncome.toFixed(2);
-      totalExpenseSpan.textContent = data.totalExpense.toFixed(2);
-      balanceSpan.textContent = (data.totalIncome - data.totalExpense).toFixed(2);
-    }
-
-    // Render daily summary grouped by date and category with totals
-    function renderDailySummary() {
-      dailySummaryDiv.innerHTML = '<h3>📊 Daily Expenses Summary</h3>';
-
-      if (data.expenses.length === 0) {
-        dailySummaryDiv.innerHTML += '<p style="text-align:center;opacity:0.6;">No expenses recorded yet.</p>';
-        return;
-      }
-
-      // Group expenses by date, then by category
-      const grouped = {};
-
-      data.expenses.forEach(exp => {
-        if (!grouped[exp.date]) grouped[exp.date] = {};
-        if (!grouped[exp.date][exp.category]) grouped[exp.date][exp.category] = 0;
-        grouped[exp.date][exp.category] += exp.amount;
-      });
-
-      // Sort dates descending
-      const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-
-      dates.forEach(date => {
-        let dailyTotal = 0;
-        const catObj = grouped[date];
-        const dateFormatted = new Date(date).toLocaleDateString();
-
-        let detailsText = '';
-        for (const cat in catObj) {
-          const amt = catObj[cat];
-          dailyTotal += amt;
-          detailsText += `  • ${cat}: ${amt.toFixed(2)} Tk\n`;
-        }
-
-        // Available balance after expenses till this date (approximate)
-        // Here, just show total income - total expense so far (you can improve by tracking incomes by date)
-        const balanceAfter = data.totalIncome - data.totalExpense;
-
-        const p = document.createElement('p');
-        p.textContent = `${dateFormatted} ➤ Total Khorocher: ${dailyTotal.toFixed(2)} Tk\n${detailsText}Available Balance: ${balanceAfter.toFixed(2)} Tk`;
-        dailySummaryDiv.appendChild(p);
-      });
-    }
-
-    // Add income function
-    function addIncome() {
-      const val = parseFloat(incomeInput.value);
-      if (isNaN(val) || val <= 0) {
-        alert('Please enter a valid positive income amount.');
-        return;
-      }
-      data.totalIncome += val;
-      incomeInput.value = '';
-      saveData();
-      renderSummary();
-      renderDailySummary();
-    }
-
-    // Add new category
-    function addCategory() {
-      const newCat = newCategoryInput.value.trim();
-      if (newCat === '') {
-        alert('Please enter a category name.');
-        return;
-      }
-      if (data.categories.includes(newCat)) {
-        alert('Category already exists.');
-        return;
-      }
-      data.categories.push(newCat);
-      newCategoryInput.value = '';
-      saveData();
-      renderCategories();
-      renderEntries();
-    }
-
-    // Generate unique ID for expense entries
-    function generateID() {
-      return '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    // Add expense
-    function addExpense() {
-      const val = parseFloat(amountInput.value);
-      if (isNaN(val) || val <= 0) {
-        alert('Please enter a valid positive expense amount.');
-        return;
-      }
-      const cat = categorySelect.value;
-      if (!cat) {
-        alert('Please select a category.');
-        return;
-      }
-      const today = getToday();
-
-      const newExpense = {
-        id: generateID(),
-        amount: val,
-        category: cat,
-        date: today
-      };
-      data.expenses.push(newExpense);
-      amountInput.value = '';
-      saveData();
-      recalcTotals();
-      renderSummary();
-      renderEntries();
-      renderDailySummary();
-    }
-
-    // Reset all data (income, expenses, categories reset to defaults)
-    function resetAll() {
-      if (!confirm('Are you sure? This will erase all data and reset categories!')) return;
-      data = {
-        totalIncome: 0,
-        totalExpense: 0,
-        categories: ['Khawa', 'Ghari Vara', 'Onno Khoroch'],
-        expenses: [],
-      };
-      saveData();
-      renderAll();
-    }
-
-    // Reset daily summary (remove expenses only, keep income & categories)
-    function resetDailySummary() {
-      if (!confirm('Are you sure you want to clear all expense records?')) return;
-      data.expenses = [];
-      data.totalExpense = 0;
-      saveData();
-      renderAll();
-    }
-
-    // Render everything
-    function renderAll() {
-      renderCategories();
-      renderEntries();
-      renderSummary();
-      renderDailySummary();
-    }
-
-    // Filter change handler
-    filterCategorySelect.addEventListener('change', renderEntries);
-
-    // Dark/light theme toggle
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light') {
-        document.body.classList.add('light');
-        toggleThemeBtn.textContent = 'Switch to Dark Mode';
-      } else {
-        document.body.classList.remove('light');
-        toggleThemeBtn.textContent = 'Switch to Light Mode';
-      }
-    }
-    function toggleTheme() {
-      if (document.body.classList.contains('light')) {
-        document.body.classList.remove('light');
-        localStorage.setItem('theme', 'dark');
-        toggleThemeBtn.textContent = 'Switch to Light Mode';
-      } else {
-        document.body.classList.add('light');
-        localStorage.setItem('theme', 'light');
-        toggleThemeBtn.textContent = 'Switch to Dark Mode';
-      }
-    }
-
-    // Print only the daily summary report
-    function printReport() {
-      const content = dailySummaryDiv.innerHTML;
-      const printWindow = window.open('', '', 'width=800,height=600');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Daily Summary Report</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              h3 { color: #0077cc; }
-              p {
-                background: #f4f4f4;
-                border-left: 6px solid #0077cc;
-                padding: 10px 15px;
-                white-space: pre-wrap;
-                border-radius: 6px;
-                margin-bottom: 12px;
-              }
-            </style>
-          </head>
-          <body>
-            ${content}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }
-
-    // Download PDF of daily summary
-    function downloadPdf() {
-      // Clone dailySummaryDiv to avoid style issues
-      const clone = dailySummaryDiv.cloneNode(true);
-      // Hide elements not needed or adjust style if needed
-      const opt = {
-        margin:       1,
-        filename:     'Daily_Summary_Report.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(clone).save();
-    }
-
-    // Event listeners
-    addIncomeBtn.addEventListener('click', addIncome);
-    addCategoryBtn.addEventListener('click', addCategory);
-    addExpenseBtn.addEventListener('click', () => {
-      addExpense();
-      // After adding expense, reset filter to all and show all entries
-      filterCategorySelect.value = 'all';
-    });
-    resetAllBtn.addEventListener('click', resetAll);
-    resetDailyBtn.addEventListener('click', resetDailySummary);
-    printBtn.addEventListener('click', printReport);
-    downloadPdfBtn.addEventListener('click', downloadPdf);
-    toggleThemeBtn.addEventListener('click', toggleTheme);
-
-    // Initialization
-    loadData();
-    renderAll();
-    loadTheme();
-  </script>
-</body>
-</html>
+  );
+}
