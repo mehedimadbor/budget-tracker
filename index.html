@@ -1,250 +1,181 @@
-<
-  import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Money Manager App</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  color: #111;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+}
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: black;
+  color: white;
+  font-weight: bold;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+.small {
+  font-size: 13px;
+  color: #444;
+}
+</style>
+</head>
+<body>
 
-export default function MoneyManagerApp() {
-  const [transactions, setTransactions] = useState([]);
-  const [amount, setAmount] = useState("");
-  const [type, setType] = useState("expense");
+<div class="container">
 
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  <div class="card">
+    <div class="title">Money Manager</div>
+    <div class="small" id="balance">Main Balance: 0 tk</div>
+    <div class="small" id="savings">Savings: 0 tk</div>
+  </div>
 
-  const [savings, setSavings] = useState(0);
-  const [saveAmount, setSaveAmount] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
+  <div class="card">
+    <input id="categoryInput" placeholder="Add Category" />
+    <button onclick="addCategory()">Add Category</button>
+    <select id="categorySelect"></select>
+  </div>
 
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [showConfirm, setShowConfirm] = useState(false);
+  <div class="card">
+    <input id="amount" type="number" placeholder="Amount" />
+    <select id="type">
+      <option value="expense">Expense</option>
+      <option value="income">Income</option>
+    </select>
+    <button onclick="addTransaction()">Add Transaction</button>
+  </div>
 
-  // LOAD
-  useEffect(() => {
-    const t = localStorage.getItem("transactions");
-    const c = localStorage.getItem("categories");
-    const s = localStorage.getItem("savings");
+  <div class="card">
+    <input id="saveAmount" type="number" placeholder="Transfer to Savings" />
+    <button onclick="toSavings()">Send to Savings</button>
 
-    if (t) setTransactions(JSON.parse(t));
-    if (c) setCategories(JSON.parse(c));
-    if (s) setSavings(JSON.parse(s));
-  }, []);
+    <input id="withdrawAmount" type="number" placeholder="Withdraw Savings" />
+    <button onclick="fromSavings()">Withdraw</button>
+  </div>
 
-  // SAVE
-  useEffect(() => {
-    localStorage.setItem("transactions", JSON.stringify(transactions));
-    localStorage.setItem("categories", JSON.stringify(categories));
-    localStorage.setItem("savings", JSON.stringify(savings));
-  }, [transactions, categories, savings]);
+  <div class="card">
+    <div class="title">Transactions</div>
+    <div id="list"></div>
+  </div>
 
-  // BALANCE
-  const income = transactions
-    .filter(t => t.type === "income")
-    .reduce((a, b) => a + Number(b.amount), 0);
+</div>
 
-  const expense = transactions
-    .filter(t => t.type === "expense")
-    .reduce((a, b) => a + Number(b.amount), 0);
+<script>
+let transactions = [];
+let categories = [];
+let savings = 0;
 
-  const balance = income - expense;
+function updateUI() {
+  let income = transactions.filter(t => t.type === 'income').reduce((a,b)=>a+Number(b.amount),0);
+  let expense = transactions.filter(t => t.type === 'expense').reduce((a,b)=>a+Number(b.amount),0);
+  let balance = income - expense;
 
-  const addCategory = () => {
-    const cat = newCategory.trim();
-    if (!cat) return;
-    if (!categories.includes(cat)) {
-      setCategories(prev => [...prev, cat]);
-    }
-    setNewCategory("");
-  };
+  document.getElementById('balance').innerText = "Main Balance: " + balance + " tk";
+  document.getElementById('savings').innerText = "Savings: " + savings + " tk";
 
-  const addTransaction = () => {
-    const amt = Number(amount);
-    if (!amt || !selectedCategory) return;
+  let list = document.getElementById('list');
+  list.innerHTML = '';
 
-    setTransactions(prev => [...prev, {
-      amount: amt,
-      type,
-      category: selectedCategory,
-      date: new Date().toISOString()
-    }]);
-
-    setAmount("");
-    setSelectedCategory("");
-  };
-
-  const addToSavings = () => {
-    const amt = Number(saveAmount);
-    if (!amt || amt <= 0 || amt > balance) return;
-
-    setSavings(prev => prev + amt);
-    setTransactions(prev => [...prev, {
-      amount: amt,
-      type: "expense",
-      category: "Transfer to Savings",
-      date: new Date().toISOString()
-    }]);
-
-    setSaveAmount("");
-  };
-
-  const withdrawFromSavings = () => {
-    const amt = Number(withdrawAmount);
-    if (!amt || amt <= 0 || amt > savings) return;
-
-    setSavings(prev => prev - amt);
-    setTransactions(prev => [...prev, {
-      amount: amt,
-      type: "income",
-      category: "From Savings",
-      date: new Date().toISOString()
-    }]);
-
-    setWithdrawAmount("");
-  };
-
-  const filteredTransactions = transactions.filter(t => {
-    if (!selectedMonth) return true;
-    const d = new Date(t.date);
-    const [y, m] = selectedMonth.split("-");
-    return d.getFullYear() === Number(y) && d.getMonth() + 1 === Number(m);
+  transactions.slice().reverse().forEach(t => {
+    let div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = `<span>${t.category}</span><span>${t.type === 'income' ? '+' : '-'}${t.amount}</span>`;
+    list.appendChild(div);
   });
 
-  const clearAll = () => {
-    setTransactions([]);
-    setCategories([]);
-    setSavings(0);
-    localStorage.clear();
-    setShowConfirm(false);
-  };
-
-  return (
-    <div className="min-h-screen bg-white text-black p-3 sm:p-6 flex justify-center">
-
-      <div className="w-full max-w-md sm:max-w-2xl space-y-4">
-
-        {/* TOP */}
-        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:items-center">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Money Manager</h1>
-            <p className="text-sm sm:text-base">Main Balance: {balance} tk</p>
-            <p className="text-sm sm:text-base">Savings: {savings} tk</p>
-          </div>
-
-          <Button className="w-full sm:w-auto" onClick={() => setShowConfirm(true)}>
-            Ops
-          </Button>
-        </div>
-
-        {/* MONTH */}
-        <Card>
-          <CardContent className="p-3">
-            <Input
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            />
-          </CardContent>
-        </Card>
-
-        {/* CATEGORY */}
-        <Card>
-          <CardContent className="p-3 space-y-2">
-            <Input
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="New Category"
-            />
-            <Button className="w-full" onClick={addCategory}>Add Category</Button>
-          </CardContent>
-        </Card>
-
-        {/* TRANSACTION */}
-        <Card>
-          <CardContent className="p-3 space-y-2">
-            <Input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount"
-            />
-
-            <select
-              className="w-full border p-2 rounded"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">Select Category</option>
-              {categories.map((c, i) => (
-                <option key={i} value={c}>{c}</option>
-              ))}
-            </select>
-
-            <select
-              className="w-full border p-2 rounded"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </select>
-
-            <Button className="w-full" onClick={addTransaction}>Add</Button>
-          </CardContent>
-        </Card>
-
-        {/* SAVINGS */}
-        <Card>
-          <CardContent className="p-3 space-y-2">
-            <Input
-              type="number"
-              value={saveAmount}
-              onChange={(e) => setSaveAmount(e.target.value)}
-              placeholder="Transfer to Savings"
-            />
-            <Button className="w-full" onClick={addToSavings}>Send to Savings</Button>
-
-            <Input
-              type="number"
-              value={withdrawAmount}
-              onChange={(e) => setWithdrawAmount(e.target.value)}
-              placeholder="Withdraw Savings"
-            />
-            <Button className="w-full" onClick={withdrawFromSavings}>Withdraw</Button>
-          </CardContent>
-        </Card>
-
-        {/* TRANSACTIONS */}
-        <Card>
-          <CardContent className="p-3">
-            <h2 className="font-bold mb-2">Transactions</h2>
-            <div className="space-y-1">
-              {filteredTransactions.map((t, i) => (
-                <div key={i} className="flex justify-between text-sm border-b py-1">
-                  <span>{t.category}</span>
-                  <span>{t.type === "income" ? "+" : "-"}{t.amount}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* CONFIRM */}
-        {showConfirm && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-            <div className="bg-white p-4 rounded w-full max-w-sm">
-              <p className="mb-3">Clear all data?</p>
-              <div className="flex gap-2">
-                <button onClick={clearAll} className="bg-red-500 text-white px-3 py-2 flex-1 rounded">Yes</button>
-                <button onClick={() => setShowConfirm(false)} className="bg-gray-200 px-3 py-2 flex-1 rounded">No</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
+  let select = document.getElementById('categorySelect');
+  select.innerHTML = '<option value="">Select Category</option>';
+  categories.forEach(c => {
+    let opt = document.createElement('option');
+    opt.value = c;
+    opt.innerText = c;
+    select.appendChild(opt);
+  });
 }
->
-      
+
+function addCategory() {
+  let val = document.getElementById('categoryInput').value.trim();
+  if(val && !categories.includes(val)) {
+    categories.push(val);
+    document.getElementById('categoryInput').value = '';
+    updateUI();
+  }
+}
+
+function addTransaction() {
+  let amount = Number(document.getElementById('amount').value);
+  let type = document.getElementById('type').value;
+  let cat = document.getElementById('categorySelect').value;
+
+  if(!amount || !cat) return;
+
+  transactions.push({amount, type, category: cat});
+
+  document.getElementById('amount').value = '';
+  updateUI();
+}
+
+function toSavings() {
+  let amt = Number(document.getElementById('saveAmount').value);
+  if(!amt) return;
+
+  savings += amt;
+  transactions.push({amount: amt, type: 'expense', category: 'Savings Transfer'});
+
+  document.getElementById('saveAmount').value = '';
+  updateUI();
+}
+
+function fromSavings() {
+  let amt = Number(document.getElementById('withdrawAmount').value);
+  if(!amt) return;
+
+  savings -= amt;
+  transactions.push({amount: amt, type: 'income', category: 'Savings Withdraw'});
+
+  document.getElementById('withdrawAmount').value = '';
+  updateUI();
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
