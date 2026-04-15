@@ -13,7 +13,7 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
 .row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0;font-size:13px}
 .title{font-size:18px;font-weight:bold}
 .small{font-size:13px;color:#444}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.danger{background:red !important;color:white !important}
 </style>
 </head>
 <body>
@@ -58,130 +58,173 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
     <button onclick="fromSavings()">Withdraw</button>
   </div>
 
+  <!-- MONTHLY HISTORY VIEW -->
+  <div class="card">
+    <div class="title">Monthly History</div>
+    <select id="monthSelect" onchange="updateUI()"></select>
+  </div>
+
   <!-- SUMMARY -->
   <div class="card">
     <div class="title">Category Expense</div>
     <div id="summary"></div>
   </div>
 
+  <!-- TRANSACTIONS -->
   <div class="card">
     <div class="title">Transactions</div>
     <div id="list"></div>
   </div>
 
+  <!-- CLEAR -->
+  <div class="card">
+    <button class="danger" onclick="clearData()">⚠ CLEAR ALL DATA</button>
+  </div>
+
 </div>
 
 <script>
-let transactions = JSON.parse(localStorage.getItem('t')||'[]');
-let categories = JSON.parse(localStorage.getItem('c')||'[]');
-let savings = JSON.parse(localStorage.getItem('s')||'0');
+let transactions = JSON.parse(localStorage.getItem('t') || '[]');
+let categories = JSON.parse(localStorage.getItem('c') || '[]');
+let savings = JSON.parse(localStorage.getItem('s') || '0');
 
 function save(){
-  localStorage.setItem('t',JSON.stringify(transactions));
-  localStorage.setItem('c',JSON.stringify(categories));
-  localStorage.setItem('s',JSON.stringify(savings));
+  localStorage.setItem('t', JSON.stringify(transactions));
+  localStorage.setItem('c', JSON.stringify(categories));
+  localStorage.setItem('s', JSON.stringify(savings));
+}
+
+function getMonths(){
+  let set = new Set();
+  transactions.forEach(t=>{
+    let d = new Date(t.date);
+    let m = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    set.add(m);
+  });
+  return Array.from(set).sort().reverse();
 }
 
 function getFiltered(){
   let m = document.getElementById('monthFilter').value;
   if(!m) return transactions;
-  let [y,mo]=m.split('-');
-  return transactions.filter(t=>{
-    let d=new Date(t.date||Date.now());
-    return d.getFullYear()==y && (d.getMonth()+1)==mo;
-  });
-}
+  let [y,mo] = m.split('-');
 
-function calc(){
-  let f=getFiltered();
-  let income=f.filter(t=>t.type=='income').reduce((a,b)=>a+Number(b.amount),0);
-  let expense=f.filter(t=>t.type=='expense').reduce((a,b)=>a+Number(b.amount),0);
-  return income-expense;
+  return transactions.filter(t => {
+    let d = new Date(t.date);
+    return d.getFullYear() == y && (d.getMonth()+1) == mo;
+  });
 }
 
 function updateUI(){
 
-  let incomeAll = transactions.filter(t=>t.type=='income').reduce((a,b)=>a+Number(b.amount),0);
-  let expenseAll = transactions.filter(t=>t.type=='expense').reduce((a,b)=>a+Number(b.amount),0);
+  let incomeAll = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+Number(b.amount),0);
+  let expenseAll = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
 
-  document.getElementById('balance').innerText="Main Balance: "+(incomeAll-expenseAll)+" tk";
-  document.getElementById('savings').innerText="Savings: "+savings+" tk";
+  document.getElementById('balance').innerText = "Main Balance: " + (incomeAll-expenseAll) + " tk";
+  document.getElementById('savings').innerText = "Savings: " + savings + " tk";
 
-  let list=document.getElementById('list');
-  list.innerHTML='';
+  // MONTH DROPDOWN
+  let monthSel = document.getElementById('monthSelect');
+  let months = getMonths();
+  monthSel.innerHTML = '<option value="">All Months</option>';
+  months.forEach(m=>{
+    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
+  });
 
-  let f=getFiltered();
+  let list = document.getElementById('list');
+  list.innerHTML = '';
+
+  let f = getFiltered();
 
   f.slice().reverse().forEach(t=>{
-    let d=document.createElement('div');
-    d.className='row';
-    d.innerHTML=`<span>${t.category}</span><span>${t.type=='income'?'+':'-'}${t.amount}</span>`;
-    list.appendChild(d);
+    let div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = `<span>${t.category}</span><span>${t.type==='income'?'+':'-'}${t.amount}</span>`;
+    list.appendChild(div);
   });
 
-  let sel=document.getElementById('categorySelect');
-  let sel2=document.getElementById('saveCategory');
-  sel.innerHTML=sel2.innerHTML='<option value="">Select</option>';
+  let sel = document.getElementById('categorySelect');
+  let sel2 = document.getElementById('saveCategory');
+  sel.innerHTML = sel2.innerHTML = '<option value="">Select</option>';
 
   categories.forEach(c=>{
-    sel.innerHTML+=`<option>${c}</option>`;
-    sel2.innerHTML+=`<option>${c}</option>`;
+    sel.innerHTML += `<option>${c}</option>`;
+    sel2.innerHTML += `<option>${c}</option>`;
   });
 
-  // CATEGORY SUMMARY
-  let sum={};
+  let sum = {};
   f.forEach(t=>{
-    if(t.type=='expense') sum[t.category]=(sum[t.category]||0)+Number(t.amount);
+    if(t.type==='expense') sum[t.category]=(sum[t.category]||0)+Number(t.amount);
   });
 
-  let s=document.getElementById('summary');
-  s.innerHTML='';
+  let s = document.getElementById('summary');
+  s.innerHTML = '';
 
   Object.entries(sum).sort((a,b)=>b[1]-a[1]).forEach(x=>{
-    s.innerHTML+=`<div class='row'><span>${x[0]}</span><span>${x[1]} tk</span></div>`;
+    s.innerHTML += `<div class='row'><span>${x[0]}</span><span>${x[1]} tk</span></div>`;
   });
 }
 
 function addCategory(){
-  let v=document.getElementById('categoryInput').value.trim();
+  let v = document.getElementById('categoryInput').value.trim();
   if(v && !categories.includes(v)) categories.push(v);
   document.getElementById('categoryInput').value='';
-  save();updateUI();
+  save(); updateUI();
 }
 
 function addTransaction(){
-  let a=Number(document.getElementById('amount').value);
-  let t=document.getElementById('type').value;
-  let c=document.getElementById('categorySelect').value;
-  if(!a||!c) return;
+  let a = Number(document.getElementById('amount').value);
+  let t = document.getElementById('type').value;
+  let c = document.getElementById('categorySelect').value;
+
+  if(!a || !c) return;
 
   transactions.push({amount:a,type:t,category:c,date:new Date()});
   document.getElementById('amount').value='';
 
-  save();updateUI();
+  save(); updateUI();
 }
 
 function toSavings(){
-  let a=Number(document.getElementById('saveAmount').value);
-  let c=document.getElementById('saveCategory').value;
-  if(!a||!c) return;
+  let a = Number(document.getElementById('saveAmount').value);
+  let c = document.getElementById('saveCategory').value;
 
-  savings+=a;
+  if(!a || !c) return;
+
+  savings += a;
   transactions.push({amount:a,type:'expense',category:'Savings from '+c,date:new Date()});
 
   document.getElementById('saveAmount').value='';
-  save();updateUI();
+
+  save(); updateUI();
 }
 
 function fromSavings(){
-  let a=Number(document.getElementById('withdrawAmount').value);
+  let a = Number(document.getElementById('withdrawAmount').value);
   if(!a) return;
 
-  savings-=a;
+  savings -= a;
   transactions.push({amount:a,type:'income',category:'Savings Withdraw',date:new Date()});
 
   document.getElementById('withdrawAmount').value='';
-  save();updateUI();
+
+  save(); updateUI();
+}
+
+// CLEAR DATA (FULL DELETE)
+function clearData(){
+  let ok = confirm("⚠ Are you sure? This will delete ALL data permanently!");
+  if(!ok) return;
+
+  transactions = [];
+  categories = [];
+  savings = 0;
+
+  localStorage.removeItem('t');
+  localStorage.removeItem('c');
+  localStorage.removeItem('s');
+
+  updateUI();
 }
 
 updateUI();
