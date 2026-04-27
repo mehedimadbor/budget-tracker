@@ -10,7 +10,7 @@ body{margin:0;font-family:Arial;background:#f5f5f5;color:#111}
 .card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 input,select{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:6px}
 button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:#fff;font-weight:bold}
-.row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:6px 0;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:6px 0;font-size:13px}
 .title{font-size:18px;font-weight:bold}
 .small{font-size:13px;color:#444}
 .danger{background:red !important;color:white !important}
@@ -24,21 +24,19 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
     <div class="title">Money Manager</div>
     <div class="small" id="balance">Main Balance: 0 tk</div>
     <div class="small" id="savings">Savings: 0 tk</div>
+    <div class="small" id="loan">Total Loan: 0 tk</div>
   </div>
 
-  <!-- MONTH FILTER -->
   <div class="card">
     <input type="month" id="monthFilter" onchange="updateUI()" />
   </div>
 
-  <!-- CATEGORY -->
   <div class="card">
     <input id="categoryInput" placeholder="Add Category" />
     <button onclick="addCategory()">Add Category</button>
     <select id="categorySelect"></select>
   </div>
 
-  <!-- TRANSACTION -->
   <div class="card">
     <input id="amount" type="number" placeholder="Amount" />
     <select id="type">
@@ -48,7 +46,6 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
     <button onclick="addTransaction()">Add Transaction</button>
   </div>
 
-  <!-- SAVINGS -->
   <div class="card">
     <input id="saveAmount" type="number" placeholder="Send to Savings" />
     <select id="saveCategory"></select>
@@ -58,25 +55,27 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
     <button onclick="fromSavings()">Withdraw</button>
   </div>
 
-  <!-- MONTHLY HISTORY VIEW -->
+  <!-- LOAN SECTION -->
   <div class="card">
-    <div class="title">Monthly History</div>
-    <select id="monthSelect" onchange="updateUI()"></select>
+    <div class="title">Loan Manager</div>
+
+    <input id="loanAmount" type="number" placeholder="Add Loan Amount" />
+    <button onclick="addLoan()">Add Loan</button>
+
+    <input id="payLoanAmount" type="number" placeholder="Pay Loan Amount" />
+    <button onclick="payLoan()">Pay Loan</button>
   </div>
 
-  <!-- SUMMARY -->
   <div class="card">
     <div class="title">Category Expense</div>
     <div id="summary"></div>
   </div>
 
-  <!-- TRANSACTIONS -->
   <div class="card">
     <div class="title">Transactions</div>
     <div id="list"></div>
   </div>
 
-  <!-- CLEAR -->
   <div class="card">
     <button class="danger" onclick="clearData()">⚠ CLEAR ALL DATA</button>
   </div>
@@ -87,26 +86,19 @@ button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:
 let transactions = JSON.parse(localStorage.getItem('t') || '[]');
 let categories = JSON.parse(localStorage.getItem('c') || '[]');
 let savings = JSON.parse(localStorage.getItem('s') || '0');
+let loan = JSON.parse(localStorage.getItem('l') || '0');
 
 function save(){
   localStorage.setItem('t', JSON.stringify(transactions));
   localStorage.setItem('c', JSON.stringify(categories));
   localStorage.setItem('s', JSON.stringify(savings));
-}
-
-function getMonths(){
-  let set = new Set();
-  transactions.forEach(t=>{
-    let d = new Date(t.date);
-    let m = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-    set.add(m);
-  });
-  return Array.from(set).sort().reverse();
+  localStorage.setItem('l', JSON.stringify(loan));
 }
 
 function getFiltered(){
   let m = document.getElementById('monthFilter').value;
   if(!m) return transactions;
+
   let [y,mo] = m.split('-');
 
   return transactions.filter(t => {
@@ -116,30 +108,23 @@ function getFiltered(){
 }
 
 function updateUI(){
-
   let incomeAll = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+Number(b.amount),0);
   let expenseAll = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
 
-  document.getElementById('balance').innerText = "Main Balance: " + (incomeAll-expenseAll) + " tk";
-  document.getElementById('savings').innerText = "Savings: " + savings + " tk";
-
-  // MONTH DROPDOWN
-  let monthSel = document.getElementById('monthSelect');
-  let months = getMonths();
-  monthSel.innerHTML = '<option value="">All Months</option>';
-  months.forEach(m=>{
-    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
-  });
+  document.getElementById('balance').innerText = 'Main Balance: ' + (incomeAll-expenseAll) + ' tk';
+  document.getElementById('savings').innerText = 'Savings: ' + savings + ' tk';
+  document.getElementById('loan').innerText = 'Total Loan: ' + loan + ' tk';
 
   let list = document.getElementById('list');
   list.innerHTML = '';
 
   let f = getFiltered();
 
-  f.slice().reverse().forEach(t=>{
+  f.slice().reverse().forEach((t)=>{
     let div = document.createElement('div');
     div.className = 'row';
-    div.innerHTML = `<span>${t.category}</span><span>${t.type==='income'?'+':'-'}${t.amount}</span>`;
+    const realIndex = transactions.findIndex(x => x.date === t.date && x.amount == t.amount && x.category === t.category && x.type === t.type);
+    div.innerHTML = `<span>${t.category}</span><span>${t.type==='income'?'+':'-'}${t.amount}</span><button onclick="deleteTransaction(${realIndex})" style="width:auto;padding:4px 8px;font-size:11px;font-weight:bold;background:#dc2626;color:white;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)">Delete</button>`;
     list.appendChild(div);
   });
 
@@ -195,7 +180,6 @@ function toSavings(){
   transactions.push({amount:a,type:'expense',category:'Savings from '+c,date:new Date()});
 
   document.getElementById('saveAmount').value='';
-
   save(); updateUI();
 }
 
@@ -207,22 +191,76 @@ function fromSavings(){
   transactions.push({amount:a,type:'income',category:'Savings Withdraw',date:new Date()});
 
   document.getElementById('withdrawAmount').value='';
-
   save(); updateUI();
 }
 
-// CLEAR DATA (FULL DELETE)
+function addLoan(){
+  let a = Number(document.getElementById('loanAmount').value);
+  if(!a) return;
+
+  loan += a;
+  transactions.push({amount:a,type:'income',category:'Loan Taken',date:new Date()});
+
+  document.getElementById('loanAmount').value='';
+  save(); updateUI();
+}
+
+function payLoan(){
+  let a = Number(document.getElementById('payLoanAmount').value);
+  if(!a) return;
+
+  loan -= a;
+  if(loan < 0) loan = 0;
+
+  transactions.push({amount:a,type:'expense',category:'Loan Payment',date:new Date()});
+
+  document.getElementById('payLoanAmount').value='';
+  save(); updateUI();
+}
+
+function deleteTransaction(index){
+  let t = transactions[index];
+  if(!t) return;
+
+  let ok = confirm('Delete this transaction?');
+  if(!ok) return;
+
+  if(t.category === 'Loan Taken'){
+    loan -= Number(t.amount);
+    if(loan < 0) loan = 0;
+  }
+
+  if(t.category === 'Loan Payment'){
+    loan += Number(t.amount);
+  }
+
+  if(t.category.startsWith('Savings from')){
+    savings -= Number(t.amount);
+    if(savings < 0) savings = 0;
+  }
+
+  if(t.category === 'Savings Withdraw'){
+    savings += Number(t.amount);
+  }
+
+  transactions.splice(index,1);
+  save();
+  updateUI();
+}
+
 function clearData(){
-  let ok = confirm("⚠ Are you sure? This will delete ALL data permanently!");
+  let ok = confirm('⚠ Are you sure? This will delete ALL data permanently!');
   if(!ok) return;
 
   transactions = [];
   categories = [];
   savings = 0;
+  loan = 0;
 
   localStorage.removeItem('t');
   localStorage.removeItem('c');
   localStorage.removeItem('s');
+  localStorage.removeItem('l');
 
   updateUI();
 }
