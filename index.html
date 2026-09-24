@@ -1,272 +1,465 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Money Manager App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="আমার হিসাব">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f5f7%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
+<title>আমার হিসাব</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:Arial;background:#f5f5f5;color:#111}
-.container{max-width:650px;margin:auto;padding:12px}
-.card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-input,select{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:6px}
-button{width:100%;padding:10px;border:0;border-radius:6px;background:#000;color:#fff;font-weight:bold}
-.row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:6px 0;font-size:13px}
-.title{font-size:18px;font-weight:bold}
-.small{font-size:13px;color:#444}
-.danger{background:red !important;color:white !important}
+:root{
+  --bg:#f4f5f7; --card:#ffffff; --text:#1a1c1e; --muted:#6b7280; --border:#e5e7eb;
+  --primary:#2563eb; --primary-d:#1d4ed8; --green:#16a34a; --green-bg:#dcfce7;
+  --red:#dc2626; --red-bg:#fee2e2; --amber:#d97706; --amber-bg:#fef3c7;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121316; --card:#1c1e22; --text:#eef0f2; --muted:#9aa1ab; --border:#2c2f34;
+    --primary:#3b82f6; --primary-d:#2563eb; --green:#22c55e; --green-bg:#0f2a19;
+    --red:#f87171; --red-bg:#3a1414; --amber:#fbbf24; --amber-bg:#332405;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121316; --card:#1c1e22; --text:#eef0f2; --muted:#9aa1ab; --border:#2c2f34;
+  --primary:#3b82f6; --primary-d:#2563eb; --green:#22c55e; --green-bg:#0f2a19;
+  --red:#f87171; --red-bg:#3a1414; --amber:#fbbf24; --amber-bg:#332405;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+*{box-sizing:border-box;}
+body{
+  margin:0; font-family:'Noto Sans Bengali','Segoe UI',sans-serif; background:var(--bg); color:var(--text);
+  height:100%; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:520px; margin:0 auto; padding:14px 14px 90px;}
+header.top{
+  position:sticky; top:0; padding-top:calc(10px + env(safe-area-inset-top,0px));
+  background:var(--bg); z-index:5; padding-bottom:6px;
+}
+h1{font-size:19px; margin:0 0 10px; text-align:center; font-weight:700;}
+.cards{display:flex; gap:10px;}
+.card{
+  flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:12px; text-align:center;
+}
+.card .lbl{font-size:12px; color:var(--muted); margin-bottom:4px;}
+.card .val{font-size:19px; font-weight:700; word-break:break-word;}
+.card.bal .val{color:var(--primary);}
+.card.exp .val{color:var(--red);}
+.tabs{display:flex; gap:6px; margin:12px 0; overflow-x:auto;}
+.tab{
+  flex:1; text-align:center; padding:8px 4px; border-radius:10px; font-size:13px; cursor:pointer;
+  background:var(--card); border:1px solid var(--border); color:var(--muted); white-space:nowrap;
+}
+.tab.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+.section{display:none;}
+.section.active{display:block;}
+.box{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px;}
+.box h3{margin:0 0 10px; font-size:15px;}
+label{display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;}
+select, input, textarea{
+  width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+  background:var(--bg); color:var(--text); font-size:14px; font-family:inherit;
+}
+.row2{display:flex; gap:8px;}
+.row2>div{flex:1;}
+.typegrid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;}
+.typebtn{
+  padding:10px 6px; border-radius:10px; border:1px solid var(--border); background:var(--bg);
+  color:var(--text); font-size:12.5px; text-align:center; cursor:pointer;
+}
+.typebtn.sel{border-color:var(--primary); background:var(--primary); color:#fff;}
+.catchip{display:inline-flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
+button.main{
+  width:100%; margin-top:14px; padding:12px; border:none; border-radius:12px; background:var(--primary);
+  color:#fff; font-size:15px; font-weight:600; cursor:pointer;
+}
+button.main:active{background:var(--primary-d);}
+.txitem{
+  display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);
+  gap:8px;
+}
+.txitem:last-child{border-bottom:none;}
+.txleft{display:flex; flex-direction:column;}
+.txleft .t1{font-size:14px; font-weight:600;}
+.txleft .t2{font-size:11.5px; color:var(--muted);}
+.txamt{font-size:14.5px; font-weight:700; white-space:nowrap;}
+.txamt.pos{color:var(--green);}
+.txamt.neg{color:var(--red);}
+.del{font-size:11px; color:var(--muted); background:none; border:none; cursor:pointer; padding:4px 6px;}
+.catrow{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+.catrow:last-child{border-bottom:none;}
+.barbg{background:var(--border); border-radius:6px; height:7px; margin-top:4px; overflow:hidden;}
+.barfg{background:var(--primary); height:100%;}
+.person{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+.person:last-child{border-bottom:none;}
+.tag{font-size:11px; padding:2px 8px; border-radius:20px; font-weight:600;}
+.tag.owe{background:var(--red-bg); color:var(--red);}
+.tag.get{background:var(--green-bg); color:var(--green);}
+.filters{display:flex; gap:8px; margin-bottom:10px;}
+.empty{text-align:center; color:var(--muted); font-size:13px; padding:20px 0;}
 </style>
 </head>
 <body>
-
-<div class="container">
-
-  <div class="card">
-    <div class="title">Money Manager</div>
-    <div class="small" id="balance">Main Balance: 0 tk</div>
-    <div class="small" id="savings">Savings: 0 tk</div>
-    <div class="small" id="loan">Total Loan: 0 tk</div>
+<div class="wrap">
+<header class="top"><h1>💰 আমার হিসাব</h1>
+  <div class="cards">
+    <div class="card bal"><div class="lbl">মোট ব্যালেন্স</div><div class="val" id="balVal">৳0</div></div>
+    <div class="card exp"><div class="lbl">মোট খরচ</div><div class="val" id="expVal">৳0</div></div>
   </div>
-
-  <div class="card">
-    <input type="month" id="monthFilter" onchange="updateUI()" />
+  <div class="tabs">
+    <div class="tab active" data-tab="dash">ড্যাশবোর্ড</div>
+    <div class="tab" data-tab="add">যোগ করুন</div>
+    <div class="tab" data-tab="loan">লোন</div>
+    <div class="tab" data-tab="hist">হিস্ট্রি</div>
   </div>
+</header>
 
-  <div class="card">
-    <input id="categoryInput" placeholder="Add Category" />
-    <button onclick="addCategory()">Add Category</button>
-    <select id="categorySelect"></select>
+<!-- DASHBOARD -->
+<div class="section active" id="sec-dash">
+  <div class="box">
+    <h3>খাত অনুযায়ী খরচ</h3>
+    <div id="catBreak"><div class="empty">এখনো কোনো খরচ নেই</div></div>
   </div>
-
-  <div class="card">
-    <input id="amount" type="number" placeholder="Amount" />
-    <select id="type">
-      <option value="expense">Expense</option>
-      <option value="income">Income</option>
-    </select>
-    <button onclick="addTransaction()">Add Transaction</button>
+  <div class="box">
+    <h3>সাম্প্রতিক লেনদেন</h3>
+    <div id="recentList"><div class="empty">কোনো লেনদেন নেই</div></div>
   </div>
+</div>
 
-  <div class="card">
-    <input id="saveAmount" type="number" placeholder="Send to Savings" />
-    <select id="saveCategory"></select>
-    <button onclick="toSavings()">Send to Savings</button>
+<!-- ADD -->
+<div class="section" id="sec-add">
+  <div class="box">
+    <h3>ধরন বেছে নিন</h3>
+    <div class="typegrid" id="typeGrid">
+      <div class="typebtn sel" data-type="deposit">জমা / ডিপোজিট</div>
+      <div class="typebtn" data-type="expense">খরচ</div>
+      <div class="typebtn" data-type="loan_taken">লোন নিলাম</div>
+      <div class="typebtn" data-type="loan_given">লোন দিলাম</div>
+      <div class="typebtn" data-type="loan_repay_taken">লোন ফেরত দিলাম</div>
+      <div class="typebtn" data-type="loan_repay_given">লোন ফেরত পেলাম</div>
+    </div>
 
-    <input id="withdrawAmount" type="number" placeholder="Withdraw Savings" />
-    <button onclick="fromSavings()">Withdraw</button>
+    <label>পরিমাণ (টাকা)</label>
+    <input type="number" id="inAmount" placeholder="0">
+
+    <div id="catWrap">
+      <label>খাত</label>
+      <select id="inCategory"></select>
+      <div class="row2" style="margin-top:8px;">
+        <div><input type="text" id="newCatInput" placeholder="নতুন খাতের নাম"></div>
+        <div style="flex:0 0 auto;"><button class="typebtn" style="height:100%;padding:10px 14px;" onclick="addCategory()">➕ যোগ</button></div>
+      </div>
+    </div>
+
+    <div id="personWrap" style="display:none;">
+      <label>ব্যক্তির নাম</label>
+      <input type="text" id="inPerson" placeholder="যেমন: রহিম">
+    </div>
+
+    <div class="row2">
+      <div><label>তারিখ</label><input type="date" id="inDate"></div>
+      <div><label>সময়</label><input type="time" id="inTime"></div>
+    </div>
+
+    <label>নোট (ঐচ্ছিক)</label>
+    <input type="text" id="inNote" placeholder="নোট লিখুন">
+
+    <button class="main" onclick="saveTx()">সংরক্ষণ করুন</button>
   </div>
+</div>
 
-  <!-- LOAN SECTION -->
-  <div class="card">
-    <div class="title">Loan Manager</div>
-
-    <input id="loanAmount" type="number" placeholder="Add Loan Amount" />
-    <button onclick="addLoan()">Add Loan</button>
-
-    <input id="payLoanAmount" type="number" placeholder="Pay Loan Amount" />
-    <button onclick="payLoan()">Pay Loan</button>
+<!-- LOAN -->
+<div class="section" id="sec-loan">
+  <div class="cards" style="margin-bottom:12px;">
+    <div class="card exp"><div class="lbl">মোট নেওয়া লোন (দিতে হবে)</div><div class="val" id="totalOweVal">৳0</div></div>
+    <div class="card bal"><div class="lbl">মোট পাওনা (পাবো)</div><div class="val" id="totalGetVal">৳0</div></div>
   </div>
-
-  <div class="card">
-    <div class="title">Category Expense</div>
-    <div id="summary"></div>
+  <div class="box">
+    <h3>যাদের কাছে আমি পাবো</h3>
+    <div id="getList"><div class="empty">কেউ নেই</div></div>
   </div>
-
-  <div class="card">
-    <div class="title">Transactions</div>
-    <div id="list"></div>
+  <div class="box">
+    <h3>যাদের আমি পাওনা দিবো</h3>
+    <div id="oweList"><div class="empty">কেউ নেই</div></div>
   </div>
+</div>
 
-  <div class="card">
-    <button class="danger" onclick="clearData()">⚠ CLEAR ALL DATA</button>
+<!-- HISTORY -->
+<div class="section" id="sec-hist">
+  <div class="box">
+    <div class="filters">
+      <div style="flex:1;"><label>মাস</label><input type="month" id="filterMonth"></div>
+      <div style="flex:0 0 auto; align-self:flex-end;"><button class="typebtn" onclick="clearFilter()">সব দেখুন</button></div>
+    </div>
+    <div id="histList"><div class="empty">কোনো লেনদেন নেই</div></div>
   </div>
+</div>
 
 </div>
 
 <script>
-let transactions = JSON.parse(localStorage.getItem('t') || '[]');
-let categories = JSON.parse(localStorage.getItem('c') || '[]');
-let savings = JSON.parse(localStorage.getItem('s') || '0');
-let loan = JSON.parse(localStorage.getItem('l') || '0');
+const DEFAULT_CATS = ['খাবার','যাতায়াত','বাসা ভাড়া','কেনাকাটা','বিল','স্বাস্থ্য','অন্যান্য'];
+let data = null;
 
-function save(){
-  localStorage.setItem('t', JSON.stringify(transactions));
-  localStorage.setItem('c', JSON.stringify(categories));
-  localStorage.setItem('s', JSON.stringify(savings));
-  localStorage.setItem('l', JSON.stringify(loan));
+function loadData(){
+  try{
+    const raw = localStorage.getItem('moneyAppData_v1');
+    if(raw) data = JSON.parse(raw);
+  }catch(e){ console.error('load fail', e); }
+  if(!data) data = {categories:[...DEFAULT_CATS], transactions:[]};
+  if(!data.categories || !data.categories.length) data.categories = [...DEFAULT_CATS];
+  if(!data.transactions) data.transactions = [];
+}
+function saveData(){
+  try{ localStorage.setItem('moneyAppData_v1', JSON.stringify(data)); }
+  catch(e){ console.error('save fail', e); }
 }
 
-function getFiltered(){
-  let m = document.getElementById('monthFilter').value;
-  if(!m) return transactions;
+const TYPE_META = {
+  deposit:{label:'জমা', sign:1, needsCat:false, needsPerson:false},
+  expense:{label:'খরচ', sign:-1, needsCat:true, needsPerson:false},
+  loan_taken:{label:'লোন নিলাম', sign:1, needsCat:false, needsPerson:true},
+  loan_given:{label:'লোন দিলাম', sign:-1, needsCat:false, needsPerson:true},
+  loan_repay_taken:{label:'লোন ফেরত দিলাম', sign:-1, needsCat:false, needsPerson:true},
+  loan_repay_given:{label:'লোন ফেরত পেলাম', sign:1, needsCat:false, needsPerson:true}
+};
 
-  let [y,mo] = m.split('-');
-
-  return transactions.filter(t => {
-    let d = new Date(t.date);
-    return d.getFullYear() == y && (d.getMonth()+1) == mo;
+function fmt(n){
+  n = Math.round(n);
+  return '৳' + n.toLocaleString('en-IN');
+}
+const BD_TZ = 'Asia/Dhaka';
+function bdParts(){
+  const d = new Date();
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BD_TZ, year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12:false
   });
+  const parts = {};
+  fmt.formatToParts(d).forEach(p=>{ parts[p.type]=p.value; });
+  return parts;
+}
+function todayStr(){
+  const p = bdParts();
+  return `${p.year}-${p.month}-${p.day}`;
+}
+function nowTime(){
+  const p = bdParts();
+  let h = p.hour === '24' ? '00' : p.hour;
+  return `${h}:${p.minute}`;
 }
 
-function updateUI(){
-  let incomeAll = transactions.filter(t=>t.type==='income').reduce((a,b)=>a+Number(b.amount),0);
-  let expenseAll = transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+Number(b.amount),0);
-
-  document.getElementById('balance').innerText = 'Main Balance: ' + (incomeAll-expenseAll) + ' tk';
-  document.getElementById('savings').innerText = 'Savings: ' + savings + ' tk';
-  document.getElementById('loan').innerText = 'Total Loan: ' + loan + ' tk';
-
-  let list = document.getElementById('list');
-  list.innerHTML = '';
-
-  let f = getFiltered();
-
-  f.slice().reverse().forEach((t)=>{
-    let div = document.createElement('div');
-    div.className = 'row';
-    const realIndex = transactions.findIndex(x => x.date === t.date && x.amount == t.amount && x.category === t.category && x.type === t.type);
-    div.innerHTML = `<span>${t.category}</span><span>${t.type==='income'?'+':'-'}${t.amount}</span><button onclick="deleteTransaction(${realIndex})" style="width:auto;padding:4px 8px;font-size:11px;font-weight:bold;background:#dc2626;color:white;border:none;border-radius:8px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)">Delete</button>`;
-    list.appendChild(div);
+// ---- Tabs ----
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('sec-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='dash') renderDash();
+    if(t.dataset.tab==='loan') renderLoans();
+    if(t.dataset.tab==='hist') renderHistory();
   });
+});
 
-  let sel = document.getElementById('categorySelect');
-  let sel2 = document.getElementById('saveCategory');
-  sel.innerHTML = sel2.innerHTML = '<option value="">Select</option>';
-
-  categories.forEach(c=>{
-    sel.innerHTML += `<option>${c}</option>`;
-    sel2.innerHTML += `<option>${c}</option>`;
+// ---- Type selection ----
+let currentType = 'deposit';
+document.querySelectorAll('.typebtn[data-type]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.typebtn[data-type]').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    currentType = b.dataset.type;
+    updateFormVisibility();
   });
-
-  let sum = {};
-  f.forEach(t=>{
-    if(t.type==='expense') sum[t.category]=(sum[t.category]||0)+Number(t.amount);
-  });
-
-  let s = document.getElementById('summary');
-  s.innerHTML = '';
-
-  Object.entries(sum).sort((a,b)=>b[1]-a[1]).forEach(x=>{
-    s.innerHTML += `<div class='row'><span>${x[0]}</span><span>${x[1]} tk</span></div>`;
-  });
+});
+function updateFormVisibility(){
+  const meta = TYPE_META[currentType];
+  document.getElementById('catWrap').style.display = meta.needsCat ? 'block' : 'none';
+  document.getElementById('personWrap').style.display = meta.needsPerson ? 'block' : 'none';
 }
 
+function refreshCategorySelect(){
+  const sel = document.getElementById('inCategory');
+  sel.innerHTML = '';
+  data.categories.forEach(c=>{
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
 function addCategory(){
-  let v = document.getElementById('categoryInput').value.trim();
-  if(v && !categories.includes(v)) categories.push(v);
-  document.getElementById('categoryInput').value='';
-  save(); updateUI();
+  const inp = document.getElementById('newCatInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!data.categories.includes(val)){
+    data.categories.push(val);
+    saveData();
+    refreshCategorySelect();
+    document.getElementById('inCategory').value = val;
+  }
+  inp.value = '';
 }
 
-function addTransaction(){
-  let a = Number(document.getElementById('amount').value);
-  let t = document.getElementById('type').value;
-  let c = document.getElementById('categorySelect').value;
-
-  if(!a || !c) return;
-
-  transactions.push({amount:a,type:t,category:c,date:new Date()});
-  document.getElementById('amount').value='';
-
-  save(); updateUI();
+function saveTx(){
+  const amount = parseFloat(document.getElementById('inAmount').value);
+  if(!amount || amount<=0){ alert('সঠিক পরিমাণ দিন'); return; }
+  const meta = TYPE_META[currentType];
+  const tx = {
+    id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
+    type: currentType,
+    amount: amount,
+    category: meta.needsCat ? document.getElementById('inCategory').value : null,
+    person: meta.needsPerson ? (document.getElementById('inPerson').value.trim() || 'অজানা') : null,
+    note: document.getElementById('inNote').value.trim(),
+    date: document.getElementById('inDate').value || todayStr(),
+    time: document.getElementById('inTime').value || nowTime()
+  };
+  if(meta.needsPerson && !document.getElementById('inPerson').value.trim()){
+    alert('ব্যক্তির নাম দিন'); return;
+  }
+  data.transactions.push(tx);
+  saveData();
+  document.getElementById('inAmount').value='';
+  document.getElementById('inNote').value='';
+  document.getElementById('inPerson').value='';
+  alert('সংরক্ষণ করা হয়েছে ✅');
+  renderDash();
 }
 
-function toSavings(){
-  let a = Number(document.getElementById('saveAmount').value);
-  let c = document.getElementById('saveCategory').value;
-
-  if(!a || !c) return;
-
-  savings += a;
-  transactions.push({amount:a,type:'expense',category:'Savings from '+c,date:new Date()});
-
-  document.getElementById('saveAmount').value='';
-  save(); updateUI();
+function deleteTx(id){
+  if(!confirm('মুছে ফেলতে চান?')) return;
+  data.transactions = data.transactions.filter(t=>t.id!==id);
+  saveData();
+  renderDash(); renderLoans(); renderHistory();
 }
 
-function fromSavings(){
-  let a = Number(document.getElementById('withdrawAmount').value);
-  if(!a) return;
-
-  savings -= a;
-  transactions.push({amount:a,type:'income',category:'Savings Withdraw',date:new Date()});
-
-  document.getElementById('withdrawAmount').value='';
-  save(); updateUI();
+// ---- Calculations ----
+function calcBalance(){
+  let bal = 0;
+  data.transactions.forEach(t=>{ bal += TYPE_META[t.type].sign * t.amount; });
+  return bal;
+}
+function calcTotalExpense(){
+  return data.transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+}
+function calcByCategory(){
+  const map = {};
+  data.transactions.filter(t=>t.type==='expense').forEach(t=>{
+    map[t.category] = (map[t.category]||0) + t.amount;
+  });
+  return map;
+}
+function calcLoans(){
+  // getFromOthers: person owes me (loan_given - loan_repay_given)
+  // oweToOthers: I owe person (loan_taken - loan_repay_taken)
+  const getMap = {}, oweMap = {};
+  data.transactions.forEach(t=>{
+    if(t.type==='loan_given') getMap[t.person] = (getMap[t.person]||0) + t.amount;
+    if(t.type==='loan_repay_given') getMap[t.person] = (getMap[t.person]||0) - t.amount;
+    if(t.type==='loan_taken') oweMap[t.person] = (oweMap[t.person]||0) + t.amount;
+    if(t.type==='loan_repay_taken') oweMap[t.person] = (oweMap[t.person]||0) - t.amount;
+  });
+  return {getMap, oweMap};
 }
 
-function addLoan(){
-  let a = Number(document.getElementById('loanAmount').value);
-  if(!a) return;
+// ---- Render ----
+function renderDash(){
+  document.getElementById('balVal').textContent = fmt(calcBalance());
+  document.getElementById('expVal').textContent = fmt(calcTotalExpense());
 
-  loan += a;
-  transactions.push({amount:a,type:'income',category:'Loan Taken',date:new Date()});
-
-  document.getElementById('loanAmount').value='';
-  save(); updateUI();
-}
-
-function payLoan(){
-  let a = Number(document.getElementById('payLoanAmount').value);
-  if(!a) return;
-
-  loan -= a;
-  if(loan < 0) loan = 0;
-
-  transactions.push({amount:a,type:'expense',category:'Loan Payment',date:new Date()});
-
-  document.getElementById('payLoanAmount').value='';
-  save(); updateUI();
-}
-
-function deleteTransaction(index){
-  let t = transactions[index];
-  if(!t) return;
-
-  let ok = confirm('Delete this transaction?');
-  if(!ok) return;
-
-  if(t.category === 'Loan Taken'){
-    loan -= Number(t.amount);
-    if(loan < 0) loan = 0;
+  const catMap = calcByCategory();
+  const total = Object.values(catMap).reduce((a,b)=>a+b,0);
+  const catBreak = document.getElementById('catBreak');
+  const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length){
+    catBreak.innerHTML = '<div class="empty">এখনো কোনো খরচ নেই</div>';
+  }else{
+    catBreak.innerHTML = entries.map(([cat,amt])=>{
+      const pct = total ? Math.round(amt/total*100) : 0;
+      return `<div class="catrow"><div>${esc(cat)}<div class="barbg"><div class="barfg" style="width:${pct}%"></div></div></div><div>${fmt(amt)} (${pct}%)</div></div>`;
+    }).join('');
   }
 
-  if(t.category === 'Loan Payment'){
-    loan += Number(t.amount);
+  const recentList = document.getElementById('recentList');
+  const recent = [...data.transactions].sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time)).slice(0,6);
+  if(!recent.length){
+    recentList.innerHTML = '<div class="empty">কোনো লেনদেন নেই</div>';
+  }else{
+    recentList.innerHTML = recent.map(txHtml).join('');
   }
-
-  if(t.category.startsWith('Savings from')){
-    savings -= Number(t.amount);
-    if(savings < 0) savings = 0;
-  }
-
-  if(t.category === 'Savings Withdraw'){
-    savings += Number(t.amount);
-  }
-
-  transactions.splice(index,1);
-  save();
-  updateUI();
 }
 
-function clearData(){
-  let ok = confirm('⚠ Are you sure? This will delete ALL data permanently!');
-  if(!ok) return;
-
-  transactions = [];
-  categories = [];
-  savings = 0;
-  loan = 0;
-
-  localStorage.removeItem('t');
-  localStorage.removeItem('c');
-  localStorage.removeItem('s');
-  localStorage.removeItem('l');
-
-  updateUI();
+function txHtml(t){
+  const meta = TYPE_META[t.type];
+  const sub = t.type==='expense' ? t.category : (t.person || '');
+  const posneg = meta.sign>0 ? 'pos' : 'neg';
+  const sign = meta.sign>0 ? '+' : '−';
+  return `<div class="txitem">
+    <div class="txleft">
+      <div class="t1">${meta.label}${sub ? ' · '+esc(sub) : ''}</div>
+      <div class="t2">${t.date} ${t.time}${t.note ? ' · '+esc(t.note) : ''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="txamt ${posneg}">${sign}${fmt(t.amount)}</div>
+      <button class="del" onclick="deleteTx('${t.id}')">✕</button>
+    </div>
+  </div>`;
 }
 
-updateUI();
+function renderLoans(){
+  const {getMap, oweMap} = calcLoans();
+  const getList = document.getElementById('getList');
+  const oweList = document.getElementById('oweList');
+  const getEntries = Object.entries(getMap).filter(([,v])=>Math.round(v)!==0);
+  const oweEntries = Object.entries(oweMap).filter(([,v])=>Math.round(v)!==0);
+
+  const totalOwe = oweEntries.reduce((s,[,v])=>s+Math.max(v,0),0);
+  const totalGet = getEntries.reduce((s,[,v])=>s+Math.max(v,0),0);
+  document.getElementById('totalOweVal').textContent = fmt(totalOwe);
+  document.getElementById('totalGetVal').textContent = fmt(totalGet);
+  getList.innerHTML = getEntries.length ? getEntries.map(([p,v])=>
+    `<div class="person"><div>${esc(p)}</div><div><span class="tag get">${fmt(Math.abs(v))}</span></div></div>`
+  ).join('') : '<div class="empty">কেউ নেই</div>';
+  oweList.innerHTML = oweEntries.length ? oweEntries.map(([p,v])=>
+    `<div class="person"><div>${esc(p)}</div><div><span class="tag owe">${fmt(Math.abs(v))}</span></div></div>`
+  ).join('') : '<div class="empty">কেউ নেই</div>';
+}
+
+function renderHistory(){
+  const monthFilter = document.getElementById('filterMonth').value;
+  let list = [...data.transactions].sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
+  if(monthFilter){
+    list = list.filter(t=> t.date.slice(0,7)===monthFilter);
+  }
+  const histList = document.getElementById('histList');
+  histList.innerHTML = list.length ? list.map(txHtml).join('') : '<div class="empty">কোনো লেনদেন নেই</div>';
+}
+function clearFilter(){
+  document.getElementById('filterMonth').value='';
+  renderHistory();
+}
+document.getElementById('filterMonth').addEventListener('change', renderHistory);
+
+function esc(s){
+  const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML;
+}
+
+// ---- init ----
+loadData();
+refreshCategorySelect();
+updateFormVisibility();
+document.getElementById('inDate').value = todayStr();
+document.getElementById('inTime').value = nowTime();
+renderDash();
+renderLoans();
 </script>
-
 </body>
 </html>
