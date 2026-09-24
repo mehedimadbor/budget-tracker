@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html<!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
@@ -21,16 +22,29 @@
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
+  :root:not([data-theme]){
     --bg:#121316; --card:#1c1e22; --text:#eef0f2; --muted:#9aa1ab; --border:#2c2f34;
     --primary:#3b82f6; --primary-d:#2563eb; --green:#22c55e; --green-bg:#0f2a19;
     --red:#f87171; --red-bg:#3a1414; --amber:#fbbf24; --amber-bg:#332405;
   }
 }
-:root[data-theme="dark"]{
-  --bg:#121316; --card:#1c1e22; --text:#eef0f2; --muted:#9aa1ab; --border:#2c2f34;
-  --primary:#3b82f6; --primary-d:#2563eb; --green:#22c55e; --green-bg:#0f2a19;
-  --red:#f87171; --red-bg:#3a1414; --amber:#fbbf24; --amber-bg:#332405;
+/* Theme 1: Red & Black */
+:root[data-theme="red-black"]{
+  --bg:#0d0d0d; --card:#1a1a1a; --text:#f5f5f5; --muted:#9c9c9c; --border:#2e2e2e;
+  --primary:#e11d2e; --primary-d:#b91424; --green:#4ade80; --green-bg:#14301f;
+  --red:#ff5b5b; --red-bg:#3a1414; --amber:#fbbf24; --amber-bg:#332405;
+}
+/* Theme 2: Green & Off-white */
+:root[data-theme="green-white"]{
+  --bg:#f7f6f0; --card:#ffffff; --text:#1a2e1f; --muted:#6b7a6e; --border:#dfe3d8;
+  --primary:#0f9d58; --primary-d:#0b7a44; --green:#0f9d58; --green-bg:#dff5e6;
+  --red:#dc2626; --red-bg:#fde2e2; --amber:#d97706; --amber-bg:#fef3c7;
+}
+/* Theme 3: Neo Blue & Black */
+:root[data-theme="neo-blue-black"]{
+  --bg:#05070d; --card:#0f1420; --text:#eaf2ff; --muted:#8ea0c0; --border:#1c2740;
+  --primary:#00c2ff; --primary-d:#00a3d9; --green:#3ddc84; --green-bg:#0e2a1c;
+  --red:#ff4d6d; --red-bg:#2a0f16; --amber:#ffd166; --amber-bg:#332405;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
 *{box-sizing:border-box;}
@@ -44,6 +58,12 @@ header.top{
   background:var(--bg); z-index:5; padding-bottom:6px;
 }
 h1{font-size:19px; margin:0 0 10px; text-align:center; font-weight:700;}
+.themerow{display:flex; justify-content:center; gap:10px; margin-bottom:12px;}
+.swatch{
+  width:30px; height:30px; border-radius:50%; cursor:pointer; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+}
+.swatch.active{border-color:var(--text); box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--text);}
 .cards{display:flex; gap:10px;}
 .card{
   flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px;
@@ -76,7 +96,6 @@ select, input, textarea{
   color:var(--text); font-size:12.5px; text-align:center; cursor:pointer;
 }
 .typebtn.sel{border-color:var(--primary); background:var(--primary); color:#fff;}
-.catchip{display:inline-flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
 button.main{
   width:100%; margin-top:14px; padding:12px; border:none; border-radius:12px; background:var(--primary);
   color:#fff; font-size:15px; font-weight:600; cursor:pointer;
@@ -105,9 +124,27 @@ button.main:active{background:var(--primary-d);}
 .tag.get{background:var(--green-bg); color:var(--green);}
 .filters{display:flex; gap:8px; margin-bottom:10px;}
 .empty{text-align:center; color:var(--muted); font-size:13px; padding:20px 0;}
+.lockOverlay{
+  position:fixed; inset:0; background:var(--bg); z-index:50; display:none;
+  flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:20px; text-align:center;
+}
+.lockIcon{font-size:58px;}
+.lockBtn{padding:14px 28px; border-radius:12px; border:none; background:var(--primary); color:#fff; font-size:15px; font-weight:600; cursor:pointer;}
 </style>
 </head>
 <body>
+<div class="lockOverlay" id="lockOverlay">
+  <div class="lockIcon">🔒</div>
+  <div style="font-size:16px; font-weight:600;">অ্যাপ লক করা আছে</div>
+  <div style="font-size:13px; color:var(--muted);">যাচাই করে ঢুকুন</div>
+  <button class="lockBtn" id="lockFingerBtn" style="display:none;" onclick="tryUnlock()">👆 ফিঙ্গারপ্রিন্ট দিয়ে আনলক করুন</button>
+  <div id="lockPinArea" style="display:none; width:100%; max-width:240px;">
+    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="unlockPinInput" placeholder="পিন দিন" style="text-align:center; letter-spacing:8px; font-size:20px;">
+    <button class="lockBtn" style="width:100%; margin-top:10px;" onclick="tryUnlockPin()">আনলক করুন</button>
+  </div>
+  <div id="lockPinToggle" style="display:none; font-size:13px; color:var(--primary); cursor:pointer; text-decoration:underline;" onclick="togglePinArea()">পিন দিয়ে আনলক করুন</div>
+  <div style="font-size:12px; color:var(--red);" id="lockErrorMsg"></div>
+</div>
 <div class="wrap">
 <header class="top"><h1>💰 আমার হিসাব</h1>
   <div class="cards">
@@ -117,8 +154,10 @@ button.main:active{background:var(--primary-d);}
   <div class="tabs">
     <div class="tab active" data-tab="dash">ড্যাশবোর্ড</div>
     <div class="tab" data-tab="add">যোগ করুন</div>
+    <div class="tab" data-tab="acc">একাউন্ট</div>
     <div class="tab" data-tab="loan">লোন</div>
     <div class="tab" data-tab="hist">হিস্ট্রি</div>
+    <div class="tab" data-tab="settings">সেটিংস</div>
   </div>
 </header>
 
@@ -145,6 +184,8 @@ button.main:active{background:var(--primary-d);}
       <div class="typebtn" data-type="loan_given">লোন দিলাম</div>
       <div class="typebtn" data-type="loan_repay_taken">লোন ফেরত দিলাম</div>
       <div class="typebtn" data-type="loan_repay_given">লোন ফেরত পেলাম</div>
+      <div class="typebtn" data-type="save_to_account">একাউন্টে জমা রাখলাম</div>
+      <div class="typebtn" data-type="use_from_account">একাউন্ট থেকে তুললাম</div>
     </div>
 
     <label>পরিমাণ (টাকা)</label>
@@ -164,6 +205,15 @@ button.main:active{background:var(--primary-d);}
       <input type="text" id="inPerson" placeholder="যেমন: রহিম">
     </div>
 
+    <div id="accWrap" style="display:none;">
+      <label>একাউন্ট</label>
+      <select id="inAccount"></select>
+      <div class="row2" style="margin-top:8px;">
+        <div><input type="text" id="newAccInput" placeholder="নতুন একাউন্টের নাম"></div>
+        <div style="flex:0 0 auto;"><button class="typebtn" style="height:100%;padding:10px 14px;" onclick="addAccount()">➕ যোগ</button></div>
+      </div>
+    </div>
+
     <div class="row2">
       <div><label>তারিখ</label><input type="date" id="inDate"></div>
       <div><label>সময়</label><input type="time" id="inTime"></div>
@@ -176,11 +226,61 @@ button.main:active{background:var(--primary-d);}
   </div>
 </div>
 
+<!-- ACCOUNTS -->
+<div class="section" id="sec-acc">
+  <div class="box">
+    <h3>মোট সঞ্চয় (সব একাউন্ট মিলিয়ে)</h3>
+    <div class="val" id="totalSaveVal" style="font-size:22px; font-weight:700; color:var(--primary);">৳0</div>
+  </div>
+  <div class="box">
+    <h3>একাউন্ট ভিত্তিক ব্যালেন্স</h3>
+    <div id="accList"><div class="empty">কোনো একাউন্ট নেই</div></div>
+  </div>
+</div>
+
 <!-- LOAN -->
 <div class="section" id="sec-loan">
   <div class="cards" style="margin-bottom:12px;">
     <div class="card exp"><div class="lbl">মোট নেওয়া লোন (দিতে হবে)</div><div class="val" id="totalOweVal">৳0</div></div>
     <div class="card bal"><div class="lbl">মোট পাওনা (পাবো)</div><div class="val" id="totalGetVal">৳0</div></div>
+  </div>
+  <div class="box">
+    <h3>টাকা পাঠান (বন্ধুকে)</h3>
+    <label>বন্ধুর নাম</label>
+    <input type="text" id="sendPersonInput" list="personList" placeholder="যেমন: রহিম">
+    <datalist id="personList"></datalist>
+    <label>পরিমাণ (টাকা)</label>
+    <input type="number" id="sendAmountInput" placeholder="0">
+    <label>নোট (ঐচ্ছিক)</label>
+    <input type="text" id="sendNoteInput" placeholder="নোট">
+    <button class="main" onclick="sendMoneyQuick()">পাঠান</button>
+  </div>
+  <div class="box">
+    <h3>QR দিয়ে লোন আদান-প্রদান</h3>
+    <div class="row2">
+      <div><button class="typebtn" style="width:100%;" onclick="openQRGenerate()">QR তৈরি করুন (পাঠান)</button></div>
+      <div><button class="typebtn" style="width:100%;" onclick="openQRScan()">QR স্ক্যান করুন (গ্রহণ)</button></div>
+    </div>
+    <div id="qrGenPanel" style="display:none; margin-top:12px;">
+      <label>পরিমাণ (টাকা)</label>
+      <input type="number" id="qrAmount" placeholder="0">
+      <label>ধরন</label>
+      <select id="qrDirection">
+        <option value="given">আমি টাকা দিলাম (ওকে লোন দিলাম)</option>
+        <option value="taken">আমি টাকা নিলাম (ওর থেকে লোন নিলাম)</option>
+      </select>
+      <label>নোট (ঐচ্ছিক)</label>
+      <input type="text" id="qrNote" placeholder="নোট">
+      <button class="main" onclick="generateLoanQR()">QR কোড দেখান</button>
+      <div id="qrCodeBox" style="display:flex; justify-content:center; margin-top:14px;"></div>
+      <div class="empty" id="qrGenHint" style="display:none;">বন্ধুকে এই QR কোড স্ক্যান করতে বলুন</div>
+    </div>
+    <div id="qrScanPanel" style="display:none; margin-top:12px;">
+      <video id="qrVideo" style="width:100%; border-radius:10px; background:#000;" playsinline muted></video>
+      <canvas id="qrCanvas" style="display:none;"></canvas>
+      <div class="empty" id="qrScanStatus">ক্যামেরা চালু হচ্ছে...</div>
+      <button class="typebtn" style="width:100%; margin-top:8px;" onclick="closeQRScan()">বন্ধ করুন</button>
+    </div>
   </div>
   <div class="box">
     <h3>যাদের কাছে আমি পাবো</h3>
@@ -189,6 +289,46 @@ button.main:active{background:var(--primary-d);}
   <div class="box">
     <h3>যাদের আমি পাওনা দিবো</h3>
     <div id="oweList"><div class="empty">কেউ নেই</div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="section" id="sec-settings">
+  <div class="box">
+    <h3>থিম</h3>
+    <div class="themerow" id="themeRow">
+      <div class="swatch" data-theme="" style="background:linear-gradient(135deg,#f4f5f7,#2563eb);" title="ক্লাসিক"></div>
+      <div class="swatch" data-theme="red-black" style="background:linear-gradient(135deg,#0d0d0d,#e11d2e);" title="লাল-কালো"></div>
+      <div class="swatch" data-theme="green-white" style="background:linear-gradient(135deg,#f7f6f0,#0f9d58);" title="সবুজ-অফহোয়াইট"></div>
+      <div class="swatch" data-theme="neo-blue-black" style="background:linear-gradient(135deg,#05070d,#00c2ff);" title="নিও ব্লু-কালো"></div>
+    </div>
+  </div>
+  <div class="box">
+    <h3>প্রোফাইল</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 6px;">এই অ্যাপের কোনো সার্ভার নেই — সব তথ্য শুধু আপনার ফোনেই থাকে, তাই সরাসরি Google দিয়ে লগইন যুক্ত করা যাচ্ছে না। নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।</p>
+    <label>আপনার নাম</label>
+    <input type="text" id="myNameInput" placeholder="যেমন: করিম">
+    <button class="typebtn" style="width:100%; margin-top:8px;" onclick="saveMyName()">সংরক্ষণ করুন</button>
+  </div>
+  <div class="box">
+    <h3>🔒 অ্যাপ লক (ফিঙ্গারপ্রিন্ট)</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 8px;">চালু করলে অ্যাপ খোলার সময় আপনার ফোনের ফিঙ্গারপ্রিন্ট বা ফেস আনলক দিয়ে যাচাই করতে হবে।</p>
+    <div style="font-size:13.5px; margin-bottom:10px;">অবস্থা: <span id="lockStatusText">বন্ধ আছে</span></div>
+    <button class="main" id="lockSetupBtn" style="margin-top:0;" onclick="setupBiometric()">ফিঙ্গারপ্রিন্ট সেটআপ করুন</button>
+    <button class="typebtn" id="lockDisableBtn" style="width:100%; display:none;" onclick="disableBiometric()">লক বন্ধ করুন</button>
+  </div>
+  <div class="box">
+    <h3>🔢 পিন লক</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 8px;">ফিঙ্গারপ্রিন্ট না থাকলে বা কাজ না করলে বিকল্প হিসেবে ৪-৬ ডিজিটের পিন দিয়েও লক করা যাবে।</p>
+    <div style="font-size:13.5px; margin-bottom:10px;">অবস্থা: <span id="pinStatusText">বন্ধ আছে</span></div>
+    <div id="pinSetupArea">
+      <label>নতুন পিন (৪-৬ সংখ্যা)</label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="newPinInput" placeholder="নতুন পিন">
+      <label>পিন আবার দিন</label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="confirmPinInput" placeholder="পিন নিশ্চিত করুন">
+      <button class="main" onclick="setupPin()">পিন সেট করুন</button>
+    </div>
+    <button class="typebtn" id="pinDisableBtn" style="width:100%; display:none;" onclick="disablePin()">পিন বন্ধ করুন</button>
   </div>
 </div>
 
@@ -205,8 +345,11 @@ button.main:active{background:var(--primary-d);}
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <script>
 const DEFAULT_CATS = ['খাবার','যাতায়াত','বাসা ভাড়া','কেনাকাটা','বিল','স্বাস্থ্য','অন্যান্য'];
+const DEFAULT_ACCS = ['ব্যাংক','বিকাশ','নগদ','রকেট'];
 let data = null;
 
 function loadData(){
@@ -214,12 +357,55 @@ function loadData(){
     const raw = localStorage.getItem('moneyAppData_v1');
     if(raw) data = JSON.parse(raw);
   }catch(e){ console.error('load fail', e); }
-  if(!data) data = {categories:[...DEFAULT_CATS], transactions:[]};
+  if(!data) data = {categories:[...DEFAULT_CATS], transactions:[], accounts:[...DEFAULT_ACCS]};
   if(!data.categories || !data.categories.length) data.categories = [...DEFAULT_CATS];
   if(!data.transactions) data.transactions = [];
+  if(!data.accounts || !data.accounts.length) data.accounts = [...DEFAULT_ACCS];
 }
 function saveData(){
   try{ localStorage.setItem('moneyAppData_v1', JSON.stringify(data)); }
+  catch(e){ console.error('save fail', e); }
+}
+
+const TYPE_META = {
+  deposit:{label:'জমা', sign:1, needsCat:false, needsPerson:false},
+  expense:{label:'খরচ', sign:-1, needsCat:true, needsPerson:false},
+  loan_taken:{label:'লোন নিলাম', sign:1, needsCat:false, needsPerson:true},
+  loan_given:{label:'লোন দিলাম', sign:-1, needsCat:false, needsPerson:true},
+  loan_repay_taken:{label:'লোন ফেরত দিলাম', sign:-1, needsCat:false, needsPerson:true, needsAccount:false},
+  loan_repay_given:{label:'লোন ফেরত পেলাম', sign:1, needsCat:false, needsPerson:true, needsAccount:false},
+  save_to_account:{label:'একাউন্টে জমা রাখলাম', sign:-1, needsCat:false, needsPerson:false, needsAccount:true},
+  use_from_account:{label:'একাউন্ট থেকে তুললাম', sign:1, needsCat:false, needsPerson:false, needsAccount:true}
+};
+
+function fmt(n){
+  n = Math.round(n);
+  return '৳' + n.toLocaleString('en-IN');
+}
+const BD_TZ = 'Asia/Dhaka';
+function bdParts(){
+  const d = new Date();
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BD_TZ, year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12:false
+  });
+  const parts = {};
+  fmt.formatToParts(d).forEach(p=>{ parts[p.type]=p.value; });
+  return parts;
+}
+function todayStr(){
+  const p = bdParts();
+  return `${p.year}-${p.month}-${p.day}`;
+}
+function nowTime(){
+  const p = bdParts();
+  let h = p.hour === '24' ? '00' : p.hour;
+  return `${h}:${p.minute}`;
+}
+
+// ---- Tabs ----
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventLy{ localStorage.setItem('moneyAppData_v1', JSON.stringify(data)); }
   catch(e){ console.error('save fail', e); }
 }
 
