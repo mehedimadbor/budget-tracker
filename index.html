@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html<!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
@@ -405,52 +404,13 @@ function nowTime(){
 
 // ---- Tabs ----
 document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventLy{ localStorage.setItem('moneyAppData_v1', JSON.stringify(data)); }
-  catch(e){ console.error('save fail', e); }
-}
-
-const TYPE_META = {
-  deposit:{label:'জমা', sign:1, needsCat:false, needsPerson:false},
-  expense:{label:'খরচ', sign:-1, needsCat:true, needsPerson:false},
-  loan_taken:{label:'লোন নিলাম', sign:1, needsCat:false, needsPerson:true},
-  loan_given:{label:'লোন দিলাম', sign:-1, needsCat:false, needsPerson:true},
-  loan_repay_taken:{label:'লোন ফেরত দিলাম', sign:-1, needsCat:false, needsPerson:true},
-  loan_repay_given:{label:'লোন ফেরত পেলাম', sign:1, needsCat:false, needsPerson:true}
-};
-
-function fmt(n){
-  n = Math.round(n);
-  return '৳' + n.toLocaleString('en-IN');
-}
-const BD_TZ = 'Asia/Dhaka';
-function bdParts(){
-  const d = new Date();
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: BD_TZ, year:'numeric', month:'2-digit', day:'2-digit',
-    hour:'2-digit', minute:'2-digit', hour12:false
-  });
-  const parts = {};
-  fmt.formatToParts(d).forEach(p=>{ parts[p.type]=p.value; });
-  return parts;
-}
-function todayStr(){
-  const p = bdParts();
-  return `${p.year}-${p.month}-${p.day}`;
-}
-function nowTime(){
-  const p = bdParts();
-  let h = p.hour === '24' ? '00' : p.hour;
-  return `${h}:${p.minute}`;
-}
-
-// ---- Tabs ----
-document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('sec-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab==='dash') renderDash();
+    if(t.dataset.tab==='acc') renderAccounts();
     if(t.dataset.tab==='loan') renderLoans();
     if(t.dataset.tab==='hist') renderHistory();
   });
@@ -470,6 +430,7 @@ function updateFormVisibility(){
   const meta = TYPE_META[currentType];
   document.getElementById('catWrap').style.display = meta.needsCat ? 'block' : 'none';
   document.getElementById('personWrap').style.display = meta.needsPerson ? 'block' : 'none';
+  document.getElementById('accWrap').style.display = meta.needsAccount ? 'block' : 'none';
 }
 
 function refreshCategorySelect(){
@@ -494,6 +455,28 @@ function addCategory(){
   inp.value = '';
 }
 
+function refreshAccountSelect(){
+  const sel = document.getElementById('inAccount');
+  sel.innerHTML = '';
+  data.accounts.forEach(a=>{
+    const o = document.createElement('option');
+    o.value = a; o.textContent = a;
+    sel.appendChild(o);
+  });
+}
+function addAccount(){
+  const inp = document.getElementById('newAccInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!data.accounts.includes(val)){
+    data.accounts.push(val);
+    saveData();
+    refreshAccountSelect();
+    document.getElementById('inAccount').value = val;
+  }
+  inp.value = '';
+}
+
 function saveTx(){
   const amount = parseFloat(document.getElementById('inAmount').value);
   if(!amount || amount<=0){ alert('সঠিক পরিমাণ দিন'); return; }
@@ -504,12 +487,20 @@ function saveTx(){
     amount: amount,
     category: meta.needsCat ? document.getElementById('inCategory').value : null,
     person: meta.needsPerson ? (document.getElementById('inPerson').value.trim() || 'অজানা') : null,
+    account: meta.needsAccount ? document.getElementById('inAccount').value : null,
     note: document.getElementById('inNote').value.trim(),
     date: document.getElementById('inDate').value || todayStr(),
     time: document.getElementById('inTime').value || nowTime()
   };
   if(meta.needsPerson && !document.getElementById('inPerson').value.trim()){
     alert('ব্যক্তির নাম দিন'); return;
+  }
+  if(currentType==='use_from_account'){
+    const bal = calcAccountBalances()[tx.account] || 0;
+    if(amount > bal){
+      alert(`${tx.account}-এ পর্যাপ্ত টাকা নেই। বর্তমান ব্যালেন্স: ${fmt(bal)}`);
+      return;
+    }
   }
   data.transactions.push(tx);
   saveData();
@@ -518,13 +509,14 @@ function saveTx(){
   document.getElementById('inPerson').value='';
   alert('সংরক্ষণ করা হয়েছে ✅');
   renderDash();
+  renderAccounts();
 }
 
 function deleteTx(id){
   if(!confirm('মুছে ফেলতে চান?')) return;
   data.transactions = data.transactions.filter(t=>t.id!==id);
   saveData();
-  renderDash(); renderLoans(); renderHistory();
+  renderDash(); renderLoans(); renderHistory(); renderAccounts();
 }
 
 // ---- Calculations ----
@@ -543,6 +535,27 @@ function calcByCategory(){
   });
   return map;
 }
+function calcAccountBalances(){
+  const map = {};
+  data.accounts.forEach(a=> map[a]=0);
+  data.transactions.forEach(t=>{
+    if(t.type==='save_to_account') map[t.account] = (map[t.account]||0) + t.amount;
+    if(t.type==='use_from_account') map[t.account] = (map[t.account]||0) - t.amount;
+  });
+  return map;
+}
+
+function renderAccounts(){
+  const map = calcAccountBalances();
+  const total = Object.values(map).reduce((a,b)=>a+b,0);
+  document.getElementById('totalSaveVal').textContent = fmt(total);
+  const accList = document.getElementById('accList');
+  const entries = data.accounts.map(a=>[a, map[a]||0]);
+  accList.innerHTML = entries.length ? entries.map(([a,v])=>
+    `<div class="person"><div>${esc(a)}</div><div><span class="tag ${v>=0?'get':'owe'}">${fmt(v)}</span></div></div>`
+  ).join('') : '<div class="empty">কোনো একাউন্ট নেই</div>';
+}
+
 function calcLoans(){
   // getFromOthers: person owes me (loan_given - loan_repay_given)
   // oweToOthers: I owe person (loan_taken - loan_repay_taken)
@@ -585,7 +598,7 @@ function renderDash(){
 
 function txHtml(t){
   const meta = TYPE_META[t.type];
-  const sub = t.type==='expense' ? t.category : (t.person || '');
+  const sub = t.type==='expense' ? t.category : (t.account || t.person || '');
   const posneg = meta.sign>0 ? 'pos' : 'neg';
   const sign = meta.sign>0 ? '+' : '−';
   return `<div class="txitem">
@@ -638,14 +651,314 @@ function esc(s){
   const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML;
 }
 
+// ---- Theme switcher ----
+function applyTheme(name){
+  if(name){ document.documentElement.setAttribute('data-theme', name); }
+  else{ document.documentElement.removeAttribute('data-theme'); }
+  try{ localStorage.setItem('appTheme_v1', name || ''); }catch(e){}
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.classList.toggle('active', s.dataset.theme === (name||''));
+  });
+}
+document.querySelectorAll('.swatch').forEach(s=>{
+  s.addEventListener('click', ()=> applyTheme(s.dataset.theme));
+});
+let savedTheme = '';
+try{ savedTheme = localStorage.getItem('appTheme_v1') || ''; }catch(e){}
+applyTheme(savedTheme);
+
+// ---- Send money (quick loan_given) ----
+function populatePersonList(){
+  const set = new Set();
+  data.transactions.forEach(t=>{ if(t.person) set.add(t.person); });
+  const dl = document.getElementById('personList');
+  dl.innerHTML = [...set].map(p=>`<option value="${esc(p)}">`).join('');
+}
+function sendMoneyQuick(){
+  const person = document.getElementById('sendPersonInput').value.trim();
+  const amount = parseFloat(document.getElementById('sendAmountInput').value);
+  if(!person){ alert('বন্ধুর নাম দিন'); return; }
+  if(!amount || amount<=0){ alert('সঠিক পরিমাণ দিন'); return; }
+  const tx = {
+    id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
+    type: 'loan_given', amount: amount, category:null, person: person, account:null,
+    note: document.getElementById('sendNoteInput').value.trim(),
+    date: todayStr(), time: nowTime()
+  };
+  data.transactions.push(tx);
+  saveData();
+  document.getElementById('sendPersonInput').value = '';
+  document.getElementById('sendAmountInput').value = '';
+  document.getElementById('sendNoteInput').value = '';
+  populatePersonList();
+  alert(`${person}-কে ${fmt(amount)} পাঠানো হয়েছে ✅`);
+  renderDash(); renderLoans();
+}
+
+// ---- Profile name ----
+function getMyName(){
+  try{ return localStorage.getItem('myName_v1') || ''; }catch(e){ return ''; }
+}
+function saveMyName(){
+  const val = document.getElementById('myNameInput').value.trim();
+  try{ localStorage.setItem('myName_v1', val); }catch(e){}
+  alert('সংরক্ষণ করা হয়েছে ✅');
+}
+
+// ---- Biometric app lock (WebAuthn) ----
+function b64urlEncode(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlDecode(str){
+  str = str.replace(/-/g,'+').replace(/\//g,'/');
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length % 4) str += '=';
+  const bin = atob(str);
+  const buf = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) buf[i] = bin.charCodeAt(i);
+  return buf.buffer;
+}
+function isBiometricSupported(){
+  return !!(window.PublicKeyCredential && navigator.credentials);
+}
+function renderLockSettings(){
+  let enabled = false;
+  try{ enabled = localStorage.getItem('appLockEnabled_v1') === 'true'; }catch(e){}
+  document.getElementById('lockStatusText').textContent = enabled ? 'চালু আছে ✅' : 'বন্ধ আছে';
+  document.getElementById('lockSetupBtn').style.display = enabled ? 'none' : 'block';
+  document.getElementById('lockDisableBtn').style.display = enabled ? 'block' : 'none';
+}
+async function setupBiometric(){
+  if(!isBiometricSupported()){ alert('এই ব্রাউজার/ডিভাইসে বায়োমেট্রিক সাপোর্ট নেই'); return; }
+  try{
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId = crypto.getRandomValues(new Uint8Array(16));
+    const cred = await navigator.credentials.create({
+      publicKey:{
+        challenge: challenge,
+        rp:{ name:'আমার হিসাব' },
+        user:{ id:userId, name:'user', displayName:'আমার হিসাব' },
+        pubKeyCredParams:[{type:'public-key', alg:-7},{type:'public-key', alg:-257}],
+        authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required' },
+        timeout:60000
+      }
+    });
+    localStorage.setItem('appLockCredId_v1', b64urlEncode(cred.rawId));
+    localStorage.setItem('appLockEnabled_v1', 'true');
+    alert('বায়োমেট্রিক লক চালু হয়েছে ✅');
+    renderLockSettings();
+  }catch(e){
+    alert('সেটআপ ব্যর্থ হয়েছে। আবার চেষ্টা করুন');
+  }
+}
+function disableBiometric(){
+  try{
+    localStorage.removeItem('appLockCredId_v1');
+    localStorage.setItem('appLockEnabled_v1', 'false');
+  }catch(e){}
+  alert('লক বন্ধ করা হয়েছে');
+  renderLockSettings();
+}
+async function tryUnlock(){
+  let credId = null;
+  try{ credId = localStorage.getItem('appLockCredId_v1'); }catch(e){}
+  if(!credId) return;
+  document.getElementById('lockErrorMsg').textContent = '';
+  try{
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    await navigator.credentials.get({
+      publicKey:{
+        challenge: challenge,
+        allowCredentials:[{ id: b64urlDecode(credId), type:'public-key' }],
+        userVerification:'required',
+        timeout:60000
+      }
+    });
+    document.getElementById('lockOverlay').style.display = 'none';
+  }catch(e){
+    document.getElementById('lockErrorMsg').textContent = 'যাচাই ব্যর্থ হয়েছে, আবার চেষ্টা করুন';
+  }
+}
+function checkLockOnLoad(){
+  let bioEnabled = false, credId = null, pinEnabled = false;
+  try{
+    bioEnabled = localStorage.getItem('appLockEnabled_v1') === 'true';
+    credId = localStorage.getItem('appLockCredId_v1');
+    pinEnabled = localStorage.getItem('appPinEnabled_v1') === 'true';
+  }catch(e){}
+  const bioReady = bioEnabled && credId && isBiometricSupported();
+  document.getElementById('lockFingerBtn').style.display = bioReady ? 'block' : 'none';
+  document.getElementById('lockPinToggle').style.display = pinEnabled ? 'block' : 'none';
+  if(bioReady || pinEnabled){
+    document.getElementById('lockOverlay').style.display = 'flex';
+    if(!bioReady && pinEnabled){ togglePinArea(); }
+  }
+}
+function togglePinArea(){
+  const area = document.getElementById('lockPinArea');
+  area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+// ---- PIN lock ----
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function renderPinSettings(){
+  let enabled = false;
+  try{ enabled = localStorage.getItem('appPinEnabled_v1') === 'true'; }catch(e){}
+  document.getElementById('pinStatusText').textContent = enabled ? 'চালু আছে ✅' : 'বন্ধ আছে';
+  document.getElementById('pinSetupArea').style.display = enabled ? 'none' : 'block';
+  document.getElementById('pinDisableBtn').style.display = enabled ? 'block' : 'none';
+}
+async function setupPin(){
+  const p1 = document.getElementById('newPinInput').value.trim();
+  const p2 = document.getElementById('confirmPinInput').value.trim();
+  if(!/^\d{4,6}$/.test(p1)){ alert('৪-৬ সংখ্যার পিন দিন'); return; }
+  if(p1 !== p2){ alert('দুইটা পিন মিলছে না'); return; }
+  const hash = await sha256Hex(p1);
+  try{
+    localStorage.setItem('appPinHash_v1', hash);
+    localStorage.setItem('appPinEnabled_v1', 'true');
+  }catch(e){}
+  document.getElementById('newPinInput').value = '';
+  document.getElementById('confirmPinInput').value = '';
+  alert('পিন সেট করা হয়েছে ✅');
+  renderPinSettings();
+}
+function disablePin(){
+  try{
+    localStorage.removeItem('appPinHash_v1');
+    localStorage.setItem('appPinEnabled_v1', 'false');
+  }catch(e){}
+  alert('পিন বন্ধ করা হয়েছে');
+  renderPinSettings();
+}
+async function tryUnlockPin(){
+  const input = document.getElementById('unlockPinInput').value.trim();
+  let storedHash = null;
+  try{ storedHash = localStorage.getItem('appPinHash_v1'); }catch(e){}
+  if(!storedHash) return;
+  const hash = await sha256Hex(input);
+  if(hash === storedHash){
+    document.getElementById('lockOverlay').style.display = 'none';
+    document.getElementById('unlockPinInput').value = '';
+  }else{
+    document.getElementById('lockErrorMsg').textContent = 'ভুল পিন, আবার চেষ্টা করুন';
+  }
+}
+
+// ---- QR loan transfer ----
+let qrStream = null, qrScanRAF = null;
+function openQRGenerate(){
+  document.getElementById('qrScanPanel').style.display = 'none';
+  stopQRScan();
+  document.getElementById('qrGenPanel').style.display = 'block';
+  document.getElementById('qrCodeBox').innerHTML = '';
+  document.getElementById('qrGenHint').style.display = 'none';
+}
+function generateLoanQR(){
+  const myName = getMyName();
+  if(!myName){ alert('আগে সেটিংস ট্যাব থেকে আপনার নাম দিন'); return; }
+  const amount = parseFloat(document.getElementById('qrAmount').value);
+  if(!amount || amount<=0){ alert('সঠিক পরিমাণ দিন'); return; }
+  const payload = {
+    app:'moneyapp_loan', by: myName, amount: amount,
+    note: document.getElementById('qrNote').value.trim(),
+    date: todayStr(), direction: document.getElementById('qrDirection').value
+  };
+  const box = document.getElementById('qrCodeBox');
+  box.innerHTML = '';
+  try{
+    new QRCode(box, {text: JSON.stringify(payload), width:200, height:200});
+    document.getElementById('qrGenHint').style.display = 'block';
+  }catch(e){
+    box.innerHTML = '<div class="empty">QR তৈরি করা যায়নি</div>';
+  }
+}
+function openQRScan(){
+  document.getElementById('qrGenPanel').style.display = 'none';
+  document.getElementById('qrScanPanel').style.display = 'block';
+  document.getElementById('qrScanStatus').textContent = 'ক্যামেরা চালু হচ্ছে...';
+  const video = document.getElementById('qrVideo');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})
+    .then(stream=>{
+      qrStream = stream;
+      video.srcObject = stream;
+      video.setAttribute('playsinline', true);
+      video.play();
+      document.getElementById('qrScanStatus').textContent = 'QR কোডের দিকে ক্যামেরা ধরুন';
+      qrScanRAF = requestAnimationFrame(scanQRFrame);
+    })
+    .catch(err=>{
+      document.getElementById('qrScanStatus').textContent = 'ক্যামেরা চালু করা যায়নি — অনুমতি দিন অথবা অন্য ব্রাউজারে চেষ্টা করুন';
+    });
+}
+function scanQRFrame(){
+  const video = document.getElementById('qrVideo');
+  const canvas = document.getElementById('qrCanvas');
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const img = ctx.getImageData(0,0,canvas.width,canvas.height);
+    const code = jsQR(img.data, img.width, img.height);
+    if(code){
+      handleScannedQR(code.data);
+      return;
+    }
+  }
+  qrScanRAF = requestAnimationFrame(scanQRFrame);
+}
+function handleScannedQR(text){
+  let payload;
+  try{ payload = JSON.parse(text); }catch(e){ payload = null; }
+  if(!payload || payload.app !== 'moneyapp_loan'){
+    document.getElementById('qrScanStatus').textContent = 'এটা লোনের QR কোড নয়, আবার চেষ্টা করুন';
+    qrScanRAF = requestAnimationFrame(scanQRFrame);
+    return;
+  }
+  closeQRScan();
+  const myType = payload.direction === 'given' ? 'loan_taken' : 'loan_given';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="add"]').classList.add('active');
+  document.getElementById('sec-add').classList.add('active');
+  document.querySelectorAll('.typebtn[data-type]').forEach(b=>{
+    b.classList.toggle('sel', b.dataset.type === myType);
+  });
+  currentType = myType;
+  updateFormVisibility();
+  document.getElementById('inAmount').value = payload.amount;
+  document.getElementById('inPerson').value = payload.by;
+  document.getElementById('inNote').value = payload.note || '';
+  document.getElementById('inDate').value = payload.date || todayStr();
+  alert(`${payload.by} থেকে QR স্ক্যান হয়েছে — বিস্তারিত দেখে "সংরক্ষণ করুন" চাপুন`);
+}
+function stopQRScan(){
+  if(qrScanRAF){ cancelAnimationFrame(qrScanRAF); qrScanRAF = null; }
+  if(qrStream){ qrStream.getTracks().forEach(t=>t.stop()); qrStream = null; }
+}
+function closeQRScan(){
+  stopQRScan();
+  document.getElementById('qrScanPanel').style.display = 'none';
+}
+
 // ---- init ----
 loadData();
 refreshCategorySelect();
+refreshAccountSelect();
 updateFormVisibility();
 document.getElementById('inDate').value = todayStr();
 document.getElementById('inTime').value = nowTime();
+document.getElementById('myNameInput').value = getMyName();
+populatePersonList();
+renderLockSettings();
+renderPinSettings();
+checkLockOnLoad();
 renderDash();
 renderLoans();
+renderAccounts();
 </script>
 </body>
 </html>
