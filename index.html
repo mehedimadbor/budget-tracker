@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FinTrack">
+<meta name="apple-mobile-web-app-title" content="আমার হিসাব">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f5f7%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
-<title>FinTrack</title>
+<title>আমার হিসাব</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -132,6 +132,33 @@ button.main:active{background:var(--primary-d);}
 }
 .langbtn.sel{border-color:var(--primary); background:var(--primary); color:#fff;}
 .contactbox{display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border); border-radius:10px; text-decoration:none; color:var(--text);}
+/* Login / Splash screen */
+.loginScreen{
+  position:fixed; inset:0; z-index:60; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; padding:24px; text-align:center; background:linear-gradient(160deg,var(--primary),var(--primary-d));
+}
+.loginLogo{font-size:56px; line-height:1;}
+.loginBrand{font-size:30px; font-weight:800; color:#fff; letter-spacing:0.5px;}
+.loginTag{font-size:13px; color:rgba(255,255,255,0.85); margin-top:-8px;}
+.loginBox{width:100%; max-width:280px; margin-top:10px;}
+.loginBox input{background:#fff; color:#111; border:none;}
+.loginBtn{width:100%; margin-top:12px; padding:13px; border:none; border-radius:12px; background:#fff; color:var(--primary-d); font-size:15px; font-weight:700; cursor:pointer;}
+/* Bottom mobile nav */
+.bottomnav{
+  position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex;
+  background:var(--card); border-top:1px solid var(--border);
+  padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));
+}
+.bnbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:11px; cursor:pointer; padding:4px;}
+.bnbtn .ic{font-size:20px;}
+.bnbtn.active{color:var(--primary);}
+.chatlog{display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow-y:auto; margin-bottom:10px;}
+.chatmsg{max-width:82%; padding:9px 12px; border-radius:14px; font-size:13.5px; line-height:1.4;}
+.chatmsg.bot{background:var(--bg); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px;}
+.chatmsg.user{background:var(--primary); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+.chatinputrow{display:flex; gap:8px;}
+.chatinputrow input{flex:1;}
+.chatinputrow button{flex:0 0 auto; padding:10px 16px; border:none; border-radius:10px; background:var(--primary); color:#fff; font-weight:600; cursor:pointer;}
 #printArea{display:none;}
 @media print{
   body *{ display:none !important; }
@@ -142,6 +169,15 @@ button.main:active{background:var(--primary-d);}
 </style>
 </head>
 <body>
+<div class="loginScreen" id="loginScreen">
+  <div class="loginLogo">💰</div>
+  <div class="loginBrand">FinTrack</div>
+  <div class="loginTag" data-i18n="login_tag">আপনার আর্থিক হিসাবের সঙ্গী</div>
+  <div class="loginBox">
+    <input type="text" id="loginNameInput" data-i18n-ph="ph_your_name" placeholder="যেমন: করিম">
+    <button class="loginBtn" onclick="loginContinue()" data-i18n="btn_get_started">শুরু করুন</button>
+  </div>
+</div>
 <div class="lockOverlay" id="lockOverlay">
   <div class="lockIcon">🔒</div>
   <div style="font-size:16px; font-weight:600;" data-i18n="lock_screen_title">অ্যাপ লক করা আছে</div>
@@ -156,7 +192,7 @@ button.main:active{background:var(--primary-d);}
 </div>
 <div id="printArea"></div>
 <div class="wrap">
-<header class="top"><h1><span data-i18n="app_title">FinTrack</span></h1>
+<header class="top"><h1>💰 <span data-i18n="app_title">আমার হিসাব</span></h1>
   <div class="cards">
     <div class="card bal"><div class="lbl" data-i18n="lbl_total_balance">মোট ব্যালেন্স</div><div class="val" id="balVal">৳0</div></div>
     <div class="card exp"><div class="lbl" data-i18n="lbl_total_expense">মোট খরচ</div><div class="val" id="expVal">৳0</div></div>
@@ -369,7 +405,26 @@ button.main:active{background:var(--primary-d);}
   </div>
 </div>
 
+<!-- AI CHAT -->
+<div class="section" id="sec-chat">
+  <div class="box">
+    <h3 data-i18n="chat_heading">🤖 AI অ্যাসিস্ট্যান্ট</h3>
+    <div class="chatlog" id="chatLog"></div>
+    <div class="chatinputrow">
+      <input type="text" id="chatInput" data-i18n-ph="ph_chat_input" placeholder="যেমন: এই মাসে কত খরচ হয়েছে?" onkeydown="if(event.key==='Enter')sendChat();">
+      <button onclick="sendChat()" data-i18n="btn_send_chat">পাঠান</button>
+    </div>
+  </div>
 </div>
+
+</div>
+
+<nav class="bottomnav" id="bottomNav">
+  <button class="bnbtn" data-bn="dash"><span class="ic">🏠</span><span data-i18n="bn_home">হোম</span></button>
+  <button class="bnbtn" data-bn="expense"><span class="ic">💸</span><span data-i18n="bn_expense">খরচ</span></button>
+  <button class="bnbtn" data-bn="chat"><span class="ic">🤖</span><span data-i18n="bn_chat">AI চ্যাট</span></button>
+  <button class="bnbtn" data-bn="deposit"><span class="ic">➕</span><span data-i18n="bn_deposit">জমা</span></button>
+</nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
@@ -420,7 +475,15 @@ const I18N = {
     alert_bio_unsupported:'এই ব্রাউজার/ডিভাইসে বায়োমেট্রিক সাপোর্ট নেই', alert_bio_enabled:'বায়োমেট্রিক লক চালু হয়েছে ✅',
     alert_bio_setup_fail:'সেটআপ ব্যর্থ হয়েছে। আবার চেষ্টা করুন', alert_lock_disabled:'লক বন্ধ করা হয়েছে',
     alert_pin_digits:'৪-৬ সংখ্যার পিন দিন', alert_pin_mismatch:'দুইটা পিন মিলছে না', alert_pin_set:'পিন সেট করা হয়েছে ✅',
-    alert_pin_disabled:'পিন বন্ধ করা হয়েছে', alert_wrong_pin:'ভুল পিন, আবার চেষ্টা করুন', confirm_delete:'মুছে ফেলতে চান?'
+    alert_pin_disabled:'পিন বন্ধ করা হয়েছে', alert_wrong_pin:'ভুল পিন, আবার চেষ্টা করুন', confirm_delete:'মুছে ফেলতে চান?',
+    login_tag:'আপনার আর্থিক হিসাবের সঙ্গী', btn_get_started:'শুরু করুন',
+    bn_home:'হোম', bn_expense:'খরচ', bn_chat:'AI চ্যাট', bn_deposit:'জমা',
+    chat_heading:'🤖 AI অ্যাসিস্ট্যান্ট', ph_chat_input:'যেমন: এই মাসে কত খরচ হয়েছে?', btn_send_chat:'পাঠান',
+    chat_greet:'হ্যালো! আমি আপনার হিসাব সম্পর্কে জিজ্ঞাসা করতে পারেন — যেমন ব্যালেন্স, খরচ, বা লোন।',
+    chat_balance:'আপনার মোট ব্যালেন্স হলো ', chat_expense:'এখন পর্যন্ত মোট খরচ হয়েছে ',
+    chat_owe:'আপনি মোট পাওনা দেবেন ', chat_get:'আপনি মোট পাবেন ',
+    chat_top_cat:'সবচেয়ে বেশি খরচ হয়েছে এই খাতে: ', chat_no_data:'এখনো যথেষ্ট তথ্য নেই',
+    chat_fallback:'দুঃখিত, এটা বুঝতে পারিনি। "ব্যালেন্স", "খরচ", "লোন" বা "খাত" নিয়ে জিজ্ঞাসা করে দেখুন।'
   },
   en:{
     app_title:'My Accounts', lbl_total_balance:'Total Balance', lbl_total_expense:'Total Expense',
@@ -467,7 +530,15 @@ const I18N = {
     alert_bio_unsupported:'Biometric not supported on this browser/device', alert_bio_enabled:'Biometric lock enabled ✅',
     alert_bio_setup_fail:'Setup failed. Try again', alert_lock_disabled:'Lock disabled',
     alert_pin_digits:'Enter a 4-6 digit PIN', alert_pin_mismatch:"The two PINs don't match", alert_pin_set:'PIN set ✅',
-    alert_pin_disabled:'PIN disabled', alert_wrong_pin:'Wrong PIN, try again', confirm_delete:'Delete this?'
+    alert_pin_disabled:'PIN disabled', alert_wrong_pin:'Wrong PIN, try again', confirm_delete:'Delete this?',
+    login_tag:'Your personal finance companion', btn_get_started:'Get Started',
+    bn_home:'Home', bn_expense:'Expense', bn_chat:'AI Chat', bn_deposit:'Deposit',
+    chat_heading:'🤖 AI Assistant', ph_chat_input:'e.g. How much did I spend this month?', btn_send_chat:'Send',
+    chat_greet:"Hi! Ask me about your accounts — like balance, expenses, or loans.",
+    chat_balance:'Your total balance is ', chat_expense:'Total expense so far is ',
+    chat_owe:'You owe a total of ', chat_get:'You are owed a total of ',
+    chat_top_cat:'Your highest spending category is: ', chat_no_data:'Not enough data yet',
+    chat_fallback:"Sorry, I didn't get that. Try asking about \"balance\", \"expense\", \"loan\" or \"category\"."
   }
 };
 let currentLang = 'bn';
@@ -529,18 +600,35 @@ function nowTime(){
 }
 
 // ---- Tabs ----
+function activateTab(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name));
+  document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+  const sec = document.getElementById('sec-'+name);
+  if(sec) sec.classList.add('active');
+  document.querySelectorAll('.bnbtn').forEach(x=>x.classList.toggle('active', x.dataset.bn===name));
+  if(name==='dash') renderDash();
+  if(name==='acc') renderAccounts();
+  if(name==='loan') renderLoans();
+  if(name==='hist') renderHistory();
+  if(name==='chat') renderChat();
+}
 document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('sec-'+t.dataset.tab).classList.add('active');
-    if(t.dataset.tab==='dash') renderDash();
-    if(t.dataset.tab==='acc') renderAccounts();
-    if(t.dataset.tab==='loan') renderLoans();
-    if(t.dataset.tab==='hist') renderHistory();
+  t.addEventListener('click', ()=> activateTab(t.dataset.tab));
+});
+
+// ---- Bottom mobile nav ----
+document.querySelectorAll('.bnbtn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const which = b.dataset.bn;
+    if(which==='expense'){ activateTab('add'); selectType('expense'); }
+    else if(which==='deposit'){ activateTab('add'); selectType('deposit'); }
+    else activateTab(which);
   });
 });
+function selectType(type){
+  const btn = document.querySelector('.typebtn[data-type="'+type+'"]');
+  if(btn) btn.click();
+}
 
 // ---- Type selection ----
 let currentType = 'deposit';
@@ -1109,6 +1197,74 @@ function closeQRScan(){
   document.getElementById('qrScanPanel').style.display = 'none';
 }
 
+// ---- Login / Splash screen ----
+function checkLoginScreen(){
+  let done = false;
+  try{ done = localStorage.getItem('loginDone_v1') === 'true'; }catch(e){}
+  const savedName = getMyName();
+  if(done){
+    document.getElementById('loginScreen').style.display = 'none';
+    return;
+  }
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginNameInput').value = savedName;
+}
+function loginContinue(){
+  const name = document.getElementById('loginNameInput').value.trim();
+  if(name){
+    try{ localStorage.setItem('myName_v1', name); }catch(e){}
+    document.getElementById('myNameInput').value = name;
+  }
+  try{ localStorage.setItem('loginDone_v1', 'true'); }catch(e){}
+  document.getElementById('loginScreen').style.display = 'none';
+  checkLockOnLoad();
+}
+
+// ---- AI Chat assistant (fully local, rule-based) ----
+let chatMessages = [];
+function renderChat(){
+  if(!chatMessages.length){ chatMessages.push({who:'bot', text:t('chat_greet')}); }
+  const log = document.getElementById('chatLog');
+  log.innerHTML = chatMessages.map(m=>`<div class="chatmsg ${m.who}">${esc(m.text)}</div>`).join('');
+  log.scrollTop = log.scrollHeight;
+}
+function getAIResponse(msg){
+  const q = msg.toLowerCase();
+  const {getMap, oweMap} = calcLoans();
+  const totalOwe = Object.values(oweMap).reduce((s,v)=>s+Math.max(v,0),0);
+  const totalGet = Object.values(getMap).reduce((s,v)=>s+Math.max(v,0),0);
+  if(q.includes('ব্যালেন্স') || q.includes('balance')){
+    return t('chat_balance') + fmt(calcBalance());
+  }
+  if(q.includes('খরচ') || q.includes('expense') || q.includes('spend')){
+    const catMap = calcByCategory();
+    const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+    let resp = t('chat_expense') + fmt(calcTotalExpense());
+    if(entries.length) resp += '। ' + t('chat_top_cat') + entries[0][0] + ' (' + fmt(entries[0][1]) + ')';
+    return resp;
+  }
+  if(q.includes('লোন') || q.includes('loan') || q.includes('পাওনা') || q.includes('owe')){
+    if(!totalOwe && !totalGet) return t('chat_no_data');
+    return t('chat_owe') + fmt(totalOwe) + '। ' + t('chat_get') + fmt(totalGet);
+  }
+  if(q.includes('খাত') || q.includes('categor')){
+    const catMap = calcByCategory();
+    const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+    if(!entries.length) return t('chat_no_data');
+    return t('chat_top_cat') + entries[0][0] + ' (' + fmt(entries[0][1]) + ')';
+  }
+  return t('chat_fallback');
+}
+function sendChat(){
+  const inp = document.getElementById('chatInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  chatMessages.push({who:'user', text:val});
+  chatMessages.push({who:'bot', text: getAIResponse(val)});
+  inp.value = '';
+  renderChat();
+}
+
 // ---- init ----
 loadData();
 refreshCategorySelect();
@@ -1124,7 +1280,8 @@ applyTheme(savedTheme);
 let savedLang = 'bn';
 try{ savedLang = localStorage.getItem('appLang_v1') || 'bn'; }catch(e){}
 applyLanguage(savedLang);
-checkLockOnLoad();
+checkLoginScreen();
+if(document.getElementById('loginScreen').style.display === 'none') checkLockOnLoad();
 </script>
 </body>
 </html>
