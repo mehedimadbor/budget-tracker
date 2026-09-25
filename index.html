@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FinTrack">
+<meta name="apple-mobile-web-app-title" content="আমার হিসাব">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f5f7%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
-<title>Fintrack</title>
+<title>আমার হিসাব</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -132,26 +132,52 @@ button.main:active{background:var(--primary-d);}
 }
 .langbtn.sel{border-color:var(--primary); background:var(--primary); color:#fff;}
 .contactbox{display:flex; align-items:center; gap:10px; padding:10px; border:1px solid var(--border); border-radius:10px; text-decoration:none; color:var(--text);}
+details.gsetup{margin-top:10px; border-top:1px solid var(--border); padding-top:10px;}
+details.gsetup summary{cursor:pointer; font-size:12.5px; color:var(--primary); font-weight:600; list-style:none;}
+details.gsetup summary::-webkit-details-marker{display:none;}
 /* Login / Splash screen */
 .loginScreen{
   position:fixed; inset:0; z-index:60; display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:16px; padding:24px; text-align:center; background:linear-gradient(160deg,var(--primary),var(--primary-d));
 }
 .loginLogo{font-size:56px; line-height:1;}
+.loginLogo img{width:56px; height:56px; border-radius:16px; object-fit:cover; display:block;}
+#headerLogoEl img{width:22px; height:22px; border-radius:6px; object-fit:cover; vertical-align:-4px; display:inline-block;}
 .loginBrand{font-size:30px; font-weight:800; color:#fff; letter-spacing:0.5px;}
 .loginTag{font-size:13px; color:rgba(255,255,255,0.85); margin-top:-8px;}
 .loginBox{width:100%; max-width:280px; margin-top:10px;}
 .loginBox input{background:#fff; color:#111; border:none;}
 .loginBtn{width:100%; margin-top:12px; padding:13px; border:none; border-radius:12px; background:#fff; color:var(--primary-d); font-size:15px; font-weight:700; cursor:pointer;}
-/* Bottom mobile nav */
+/* Bottom mobile nav — floating pill with raised center action */
 .bottomnav{
-  position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex;
-  background:var(--card); border-top:1px solid var(--border);
-  padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));
+  position:fixed; left:14px; right:14px; z-index:20;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  max-width:492px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  height:58px; padding:0 4px;
+  background:var(--card); border-radius:29px;
+  box-shadow:0 16px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.06);
 }
-.bnbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:11px; cursor:pointer; padding:4px;}
-.bnbtn .ic{font-size:20px;}
+.bnbtn{
+  position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0; background:none; border:none; color:var(--muted); font-family:inherit;
+  cursor:pointer; height:100%; padding:0;
+}
+.bnbtn svg{width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+.bnbtn .lbl{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+.bnbtn .dot{display:block; width:5px; height:5px; border-radius:50%; background:var(--primary); margin-top:5px; opacity:0; transform:scale(.4); transition:opacity .18s, transform .18s;}
 .bnbtn.active{color:var(--primary);}
+.bnbtn.active .dot{opacity:1; transform:scale(1);}
+.bnbtn.fab{flex:0 0 58px;}
+.bnbtn.fab .fabcircle{
+  width:48px; height:48px; border-radius:50%; margin-top:-32px;
+  background:linear-gradient(150deg,#8f7dff,#6c4bef);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 7px rgba(124,92,239,0.16), 0 10px 22px rgba(108,75,239,0.5);
+  transition:transform .15s;
+}
+.bnbtn.fab:active .fabcircle{transform:scale(0.92);}
+.bnbtn.fab .fabcircle svg{width:21px; height:21px; stroke:#fff; stroke-width:2.3;}
 .chatlog{display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow-y:auto; margin-bottom:10px;}
 .chatmsg{max-width:82%; padding:9px 12px; border-radius:14px; font-size:13.5px; line-height:1.4;}
 .chatmsg.bot{background:var(--bg); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px;}
@@ -170,7 +196,7 @@ button.main:active{background:var(--primary-d);}
 </head>
 <body>
 <div class="loginScreen" id="loginScreen">
-  <div class="loginLogo">💰</div>
+  <div class="loginLogo" id="loginLogoEl">💰</div>
   <div class="loginBrand">FinTrack</div>
   <div class="loginTag" data-i18n="login_tag">আপনার আর্থিক হিসাবের সঙ্গী</div>
   <div class="loginBox">
@@ -192,7 +218,7 @@ button.main:active{background:var(--primary-d);}
 </div>
 <div id="printArea"></div>
 <div class="wrap">
-<header class="top"><h1>💰 <span data-i18n="app_title">আমার হিসাব</span></h1>
+<header class="top"><h1><span id="headerLogoEl">💰</span> <span data-i18n="app_title">আমার হিসাব</span></h1>
   <div class="cards">
     <div class="card bal"><div class="lbl" data-i18n="lbl_total_balance">মোট ব্যালেন্স</div><div class="val" id="balVal">৳0</div></div>
     <div class="card exp"><div class="lbl" data-i18n="lbl_total_expense">মোট খরচ</div><div class="val" id="expVal">৳0</div></div>
@@ -370,10 +396,54 @@ button.main:active{background:var(--primary-d);}
   </div>
   <div class="box">
     <h3 data-i18n="settings_profile">প্রোফাইল</h3>
-    <p style="font-size:12.5px; color:var(--muted); margin:0 0 6px;" data-i18n="profile_note">এই অ্যাপের কোনো সার্ভার নেই — সব তথ্য শুধু আপনার ফোনেই থাকে, তাই সরাসরি Google দিয়ে লগইন যুক্ত করা যাচ্ছে না। নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।</p>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 6px;" data-i18n="profile_note">নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।</p>
     <label data-i18n="lbl_your_name">আপনার নাম</label>
     <input type="text" id="myNameInput" data-i18n-ph="ph_your_name" placeholder="যেমন: করিম">
     <button class="typebtn" style="width:100%; margin-top:8px;" onclick="saveMyName()" data-i18n="btn_save">সংরক্ষণ করুন</button>
+  </div>
+  <div class="box">
+    <h3 data-i18n="gmail_heading">🔐 Google একাউন্ট (Login ও ব্যাকআপ)</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 8px;" data-i18n="gmail_note">এই অ্যাপের কোনো সার্ভার নেই, তাই আপনার Google একাউন্ট দিয়ে Login করলে সব হিসাব সরাসরি আপনার নিজের Google Drive-এ ব্যাকআপ থাকবে — অন্য ফোনে বসালে Restore করে ফিরিয়ে আনা যাবে।</p>
+    <div id="gmailSignedOut">
+      <button class="main" style="margin-top:0;" onclick="startGoogleSignIn()" data-i18n="btn_google_login">Google দিয়ে Login করুন</button>
+    </div>
+    <div id="gmailSignedIn" style="display:none;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <img id="gmailAvatar" style="width:38px; height:38px; border-radius:50%; background:var(--bg);" alt="">
+        <div>
+          <div id="gmailName" style="font-size:13.5px; font-weight:600;"></div>
+          <div id="gmailEmail" style="font-size:12px; color:var(--muted);"></div>
+        </div>
+      </div>
+      <div class="row2">
+        <button class="typebtn" onclick="backupToDrive()" data-i18n="btn_backup_now">এখনই ব্যাকআপ নিন</button>
+        <button class="typebtn" onclick="restoreFromDrive()" data-i18n="btn_restore_backup">ব্যাকআপ ফিরিয়ে আনুন</button>
+      </div>
+      <button class="typebtn" style="width:100%; margin-top:8px;" onclick="googleSignOut()" data-i18n="btn_google_logout">Logout করুন</button>
+    </div>
+    <div id="gmailStatusText" style="font-size:12.5px; color:var(--primary); margin-top:8px;"></div>
+    <details class="gsetup">
+      <summary data-i18n="gmail_setup_toggle">⚙️ ডেভেলপার সেটআপ (একবারই লাগবে)</summary>
+      <p style="font-size:12px; color:var(--muted); margin:8px 0;" data-i18n="gmail_setup_note">Google Login কাজ করাতে হলে আপনার নিজের একটা Google Cloud OAuth Client ID লাগবে (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, Authorized JavaScript origin হিসেবে এই অ্যাপটা যেখানে হোস্ট করা আছে সেই ঠিকানা দিন)। তারপর সেই Client ID নিচে বসিয়ে সংরক্ষণ করুন।</p>
+      <label data-i18n="lbl_google_clientid">Google Client ID</label>
+      <input type="text" id="googleClientIdInput" placeholder="xxxxx.apps.googleusercontent.com">
+      <button class="typebtn" style="width:100%; margin-top:8px;" onclick="saveGoogleClientId()" data-i18n="btn_save">সংরক্ষণ করুন</button>
+    </details>
+  </div>
+  <div class="box">
+    <h3 data-i18n="settings_logo">🖼️ অ্যাপ লোগো</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 10px;" data-i18n="logo_note">চাইলে অ্যাপের ডিফল্ট লোগোর বদলে নিজের ছবি বা লোগো বসাতে পারেন। এটা লগইন স্ক্রিন ও উপরের টাইটেলে দেখাবে।</p>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      <div id="logoPreviewWrap" style="width:52px; height:52px; border-radius:14px; overflow:hidden; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; background:var(--bg); flex-shrink:0;">
+        <span id="logoPreviewEmoji" style="font-size:28px;">💰</span>
+        <img id="logoPreviewImg" style="display:none; width:100%; height:100%; object-fit:cover;">
+      </div>
+      <div style="flex:1;">
+        <input type="file" id="logoFileInput" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+        <button class="typebtn" style="width:100%;" onclick="document.getElementById('logoFileInput').click()" data-i18n="btn_change_logo">লোগো পরিবর্তন করুন</button>
+      </div>
+    </div>
+    <button class="typebtn" id="logoResetBtn" style="width:100%; display:none;" onclick="resetLogo()" data-i18n="btn_reset_logo">ডিফল্ট লোগোতে ফিরে যান</button>
   </div>
   <div class="box">
     <h3 data-i18n="lock_heading">🔒 অ্যাপ লক (ফিঙ্গারপ্রিন্ট)</h3>
@@ -420,10 +490,30 @@ button.main:active{background:var(--primary-d);}
 </div>
 
 <nav class="bottomnav" id="bottomNav">
-  <button class="bnbtn" data-bn="dash"><span class="ic">🏠</span><span data-i18n="bn_home">হোম</span></button>
-  <button class="bnbtn" data-bn="expense"><span class="ic">💸</span><span data-i18n="bn_expense">খরচ</span></button>
-  <button class="bnbtn" data-bn="chat"><span class="ic">🤖</span><span data-i18n="bn_chat">AI চ্যাট</span></button>
-  <button class="bnbtn" data-bn="deposit"><span class="ic">➕</span><span data-i18n="bn_deposit">জমা</span></button>
+  <button class="bnbtn" data-bn="dash">
+    <svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>
+    <span class="dot"></span>
+    <span class="lbl" data-i18n="bn_home">হোম</span>
+  </button>
+  <button class="bnbtn" data-bn="chat">
+    <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+    <span class="dot"></span>
+    <span class="lbl" data-i18n="bn_chat">AI চ্যাট</span>
+  </button>
+  <button class="bnbtn fab" data-bn="add">
+    <span class="fabcircle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+    <span class="lbl" data-i18n="bn_deposit">যোগ করুন</span>
+  </button>
+  <button class="bnbtn" data-bn="loan">
+    <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    <span class="dot"></span>
+    <span class="lbl" data-i18n="bn_notif">লোন / নোটিফিকেশন</span>
+  </button>
+  <button class="bnbtn" data-bn="settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    <span class="dot"></span>
+    <span class="lbl" data-i18n="bn_profile">প্রোফাইল</span>
+  </button>
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -452,8 +542,24 @@ const I18N = {
     loan_people_owe_me:'যাদের কাছে আমি পাবো', loan_people_i_owe:'যাদের আমি পাওনা দিবো',
     hist_month:'মাস', hist_show_all:'সব দেখুন', hist_print:'🖨️ প্রিন্ট করুন',
     settings_theme:'থিম', settings_lang:'ভাষা', settings_profile:'প্রোফাইল',
-    profile_note:'এই অ্যাপের কোনো সার্ভার নেই — সব তথ্য শুধু আপনার ফোনেই থাকে, তাই সরাসরি Google দিয়ে লগইন যুক্ত করা যাচ্ছে না। নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।',
+    profile_note:'নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।',
     lbl_your_name:'আপনার নাম', ph_your_name:'যেমন: করিম',
+    gmail_heading:'🔐 Google একাউন্ট (Login ও ব্যাকআপ)',
+    gmail_note:'এই অ্যাপের কোনো সার্ভার নেই, তাই আপনার Google একাউন্ট দিয়ে Login করলে সব হিসাব সরাসরি আপনার নিজের Google Drive-এ ব্যাকআপ থাকবে — অন্য ফোনে বসালে Restore করে ফিরিয়ে আনা যাবে।',
+    btn_google_login:'Google দিয়ে Login করুন', btn_google_logout:'Logout করুন',
+    btn_backup_now:'এখনই ব্যাকআপ নিন', btn_restore_backup:'ব্যাকআপ ফিরিয়ে আনুন',
+    gmail_setup_toggle:'⚙️ ডেভেলপার সেটআপ (একবারই লাগবে)',
+    gmail_setup_note:'Google Login কাজ করাতে হলে আপনার নিজের একটা Google Cloud OAuth Client ID লাগবে (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, Authorized JavaScript origin হিসেবে এই অ্যাপটা যেখানে হোস্ট করা আছে সেই ঠিকানা দিন)। তারপর সেই Client ID নিচে বসিয়ে সংরক্ষণ করুন।',
+    lbl_google_clientid:'Google Client ID',
+    gmail_need_clientid:'আগে নিচে ডেভেলপার সেটআপ থেকে Google Client ID বসিয়ে সংরক্ষণ করুন।',
+    gmail_connecting:'সংযুক্ত হচ্ছে...', gmail_login_fail:'Login ব্যর্থ হয়েছে, আবার চেষ্টা করুন।',
+    gmail_need_login:'আগে Google দিয়ে Login করুন।',
+    gmail_backing_up:'ব্যাকআপ নেওয়া হচ্ছে...', gmail_backup_done:'✅ ব্যাকআপ সফল হয়েছে।', gmail_backup_fail:'ব্যাকআপ ব্যর্থ হয়েছে, আবার চেষ্টা করুন।',
+    gmail_restore_confirm:'ব্যাকআপ থেকে ফিরিয়ে আনলে এই ডিভাইসের বর্তমান হিসাব বদলে যাবে। এগিয়ে যাবেন?',
+    gmail_restoring:'ফিরিয়ে আনা হচ্ছে...', gmail_restore_done:'✅ সফলভাবে ফিরিয়ে আনা হয়েছে, রিলোড হচ্ছে...',
+    gmail_restore_fail:'ফিরিয়ে আনতে ব্যর্থ হয়েছে।', gmail_no_backup:'কোনো ব্যাকআপ পাওয়া যায়নি।',
+    settings_logo:'🖼️ অ্যাপ লোগো', logo_note:'চাইলে অ্যাপের ডিফল্ট লোগোর বদলে নিজের ছবি বা লোগো বসাতে পারেন। এটা লগইন স্ক্রিন ও উপরের টাইটেলে দেখাবে।',
+    btn_change_logo:'লোগো পরিবর্তন করুন', btn_reset_logo:'ডিফল্ট লোগোতে ফিরে যান',
     lock_heading:'🔒 অ্যাপ লক (ফিঙ্গারপ্রিন্ট)', lock_note:'চালু করলে অ্যাপ খোলার সময় আপনার ফোনের ফিঙ্গারপ্রিন্ট বা ফেস আনলক দিয়ে যাচাই করতে হবে।',
     lbl_status:'অবস্থা:', status_on:'চালু আছে ✅', status_off:'বন্ধ আছে',
     btn_setup_finger:'ফিঙ্গারপ্রিন্ট সেটআপ করুন', btn_disable_lock:'লক বন্ধ করুন',
@@ -477,13 +583,16 @@ const I18N = {
     alert_pin_digits:'৪-৬ সংখ্যার পিন দিন', alert_pin_mismatch:'দুইটা পিন মিলছে না', alert_pin_set:'পিন সেট করা হয়েছে ✅',
     alert_pin_disabled:'পিন বন্ধ করা হয়েছে', alert_wrong_pin:'ভুল পিন, আবার চেষ্টা করুন', confirm_delete:'মুছে ফেলতে চান?',
     login_tag:'আপনার আর্থিক হিসাবের সঙ্গী', btn_get_started:'শুরু করুন',
-    bn_home:'হোম', bn_expense:'খরচ', bn_chat:'AI চ্যাট', bn_deposit:'জমা',
+    bn_home:'হোম', bn_expense:'খরচ', bn_chat:'AI চ্যাট', bn_deposit:'যোগ করুন', bn_notif:'লোন / নোটিফিকেশন', bn_profile:'প্রোফাইল',
     chat_heading:'🤖 AI অ্যাসিস্ট্যান্ট', ph_chat_input:'যেমন: এই মাসে কত খরচ হয়েছে?', btn_send_chat:'পাঠান',
-    chat_greet:'হ্যালো! আমি আপনার হিসাব সম্পর্কে জিজ্ঞাসা করতে পারেন — যেমন ব্যালেন্স, খরচ, বা লোন।',
+    chat_greet:'হ্যালো! আমি আপনার হিসাব সম্পর্কে বলতে পারি (ব্যালেন্স, খরচ, লোন) — আবার সরাসরি লিখলে হিসাবও যোগ করে দিতে পারি। যেমন: "রহিমকে ৫০০ টাকা ধার দিলাম" বা "৩০০ টাকা খাবারে খরচ হলো"।',
     chat_balance:'আপনার মোট ব্যালেন্স হলো ', chat_expense:'এখন পর্যন্ত মোট খরচ হয়েছে ',
     chat_owe:'আপনি মোট পাওনা দেবেন ', chat_get:'আপনি মোট পাবেন ',
     chat_top_cat:'সবচেয়ে বেশি খরচ হয়েছে এই খাতে: ', chat_no_data:'এখনো যথেষ্ট তথ্য নেই',
-    chat_fallback:'দুঃখিত, এটা বুঝতে পারিনি। "ব্যালেন্স", "খরচ", "লোন" বা "খাত" নিয়ে জিজ্ঞাসা করে দেখুন।'
+    chat_need_amount:'পরিমাণটা বুঝতে পারিনি — টাকার অংক দিয়ে আবার লিখুন, যেমন: "৫০০ টাকা খরচ হলো খাবারে"।',
+    chat_need_person:'কার সাথে এই লেনদেন, নামটা বলুন — যেমন: "রহিমকে ৫০০ টাকা ধার দিলাম"।',
+    chat_undo_hint:'ভুল হলে লিখুন "ফিরিয়ে নাও"।', chat_undo_done:'✅ শেষ এন্ট্রিটা মুছে ফেলা হয়েছে।', chat_undo_none:'ফিরিয়ে নেওয়ার মতো কিছু নেই।',
+    chat_fallback:'দুঃখিত, এটা বুঝতে পারিনি। "ব্যালেন্স", "খরচ", "লোন", "খাত" জিজ্ঞাসা করুন, অথবা সরাসরি লিখুন — যেমন "৫০০ টাকা জমা হলো" বা "রহিমের কাছ থেকে ২০০ টাকা ধার নিলাম"।'
   },
   en:{
     app_title:'My Accounts', lbl_total_balance:'Total Balance', lbl_total_expense:'Total Expense',
@@ -507,8 +616,24 @@ const I18N = {
     loan_people_owe_me:'People who owe me', loan_people_i_owe:'People I owe',
     hist_month:'Month', hist_show_all:'Show All', hist_print:'🖨️ Print',
     settings_theme:'Theme', settings_lang:'Language', settings_profile:'Profile',
-    profile_note:"This app has no server — all data stays only on your phone, so direct Google Sign-In isn't possible. Set a name below; friends will see it when you share a QR.",
+    profile_note:"Set a name below; friends will see it when you share a QR.",
     lbl_your_name:'Your Name', ph_your_name:'e.g. Karim',
+    gmail_heading:'🔐 Google Account (Login & Backup)',
+    gmail_note:"This app has no server, so signing in with Google backs up your data straight to your own Google Drive — you can restore it later on another phone.",
+    btn_google_login:'Login with Google', btn_google_logout:'Log out',
+    btn_backup_now:'Backup Now', btn_restore_backup:'Restore Backup',
+    gmail_setup_toggle:'⚙️ Developer setup (one-time)',
+    gmail_setup_note:'To make Google Login work you need your own Google Cloud OAuth Client ID (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, set the Authorized JavaScript origin to wherever this app is hosted). Paste that Client ID below and save.',
+    lbl_google_clientid:'Google Client ID',
+    gmail_need_clientid:'First set a Google Client ID in Developer setup below and save it.',
+    gmail_connecting:'Connecting...', gmail_login_fail:'Login failed, please try again.',
+    gmail_need_login:'Please log in with Google first.',
+    gmail_backing_up:'Backing up...', gmail_backup_done:'✅ Backup successful.', gmail_backup_fail:'Backup failed, please try again.',
+    gmail_restore_confirm:'Restoring will overwrite the current data on this device. Continue?',
+    gmail_restoring:'Restoring...', gmail_restore_done:'✅ Restored successfully, reloading...',
+    gmail_restore_fail:'Restore failed.', gmail_no_backup:'No backup found.',
+    settings_logo:'🖼️ App Logo', logo_note:"Swap the app's default logo for your own image or brand mark. It'll show on the login screen and the top title.",
+    btn_change_logo:'Change Logo', btn_reset_logo:'Reset to Default Logo',
     lock_heading:'🔒 App Lock (Fingerprint)', lock_note:"When enabled, you'll need to verify with your phone's fingerprint or face unlock to open the app.",
     lbl_status:'Status:', status_on:'Enabled ✅', status_off:'Disabled',
     btn_setup_finger:'Setup Fingerprint', btn_disable_lock:'Disable Lock',
@@ -532,13 +657,16 @@ const I18N = {
     alert_pin_digits:'Enter a 4-6 digit PIN', alert_pin_mismatch:"The two PINs don't match", alert_pin_set:'PIN set ✅',
     alert_pin_disabled:'PIN disabled', alert_wrong_pin:'Wrong PIN, try again', confirm_delete:'Delete this?',
     login_tag:'Your personal finance companion', btn_get_started:'Get Started',
-    bn_home:'Home', bn_expense:'Expense', bn_chat:'AI Chat', bn_deposit:'Deposit',
+    bn_home:'Home', bn_expense:'Expense', bn_chat:'AI Chat', bn_deposit:'Add', bn_notif:'Loan / Notifications', bn_profile:'Profile',
     chat_heading:'🤖 AI Assistant', ph_chat_input:'e.g. How much did I spend this month?', btn_send_chat:'Send',
-    chat_greet:"Hi! Ask me about your accounts — like balance, expenses, or loans.",
+    chat_greet:"Hi! Ask me about your accounts (balance, expenses, loans) — or just tell me a transaction and I'll log it. e.g. \"gave Rahim a loan of 500 taka\" or \"spent 300 on food\".",
     chat_balance:'Your total balance is ', chat_expense:'Total expense so far is ',
     chat_owe:'You owe a total of ', chat_get:'You are owed a total of ',
     chat_top_cat:'Your highest spending category is: ', chat_no_data:'Not enough data yet',
-    chat_fallback:"Sorry, I didn't get that. Try asking about \"balance\", \"expense\", \"loan\" or \"category\"."
+    chat_need_amount:'I couldn\'t catch the amount — try again with a number, e.g. "spent 500 on food".',
+    chat_need_person:"Who's this transaction with? e.g. \"gave Rahim a loan of 500\".",
+    chat_undo_hint:'If that was wrong, just say "undo".', chat_undo_done:'✅ Last entry removed.', chat_undo_none:'Nothing to undo.',
+    chat_fallback:"Sorry, I didn't get that. Ask about \"balance\", \"expense\", \"loan\" or \"category\" — or just tell me a transaction, e.g. \"deposited 500\" or \"took a loan of 200 from Rahim\"."
   }
 };
 let currentLang = 'bn';
@@ -618,12 +746,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 
 // ---- Bottom mobile nav ----
 document.querySelectorAll('.bnbtn').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    const which = b.dataset.bn;
-    if(which==='expense'){ activateTab('add'); selectType('expense'); }
-    else if(which==='deposit'){ activateTab('add'); selectType('deposit'); }
-    else activateTab(which);
-  });
+  b.addEventListener('click', ()=> activateTab(b.dataset.bn));
 });
 function selectType(type){
   const btn = document.querySelector('.typebtn[data-type="'+type+'"]');
@@ -959,6 +1082,156 @@ function saveMyName(){
   alert(t('alert_saved'));
 }
 
+// ---- Google Sign-In & Drive backup ----
+function loadScriptOnce(src){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[src="${src}"]`)){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = ()=>resolve(); s.onerror = ()=>reject(new Error('load fail'));
+    document.head.appendChild(s);
+  });
+}
+let gAccessToken = null;
+let gTokenClient = null;
+function getGoogleClientId(){
+  try{ return localStorage.getItem('googleClientId_v1') || ''; }catch(e){ return ''; }
+}
+function saveGoogleClientId(){
+  const val = document.getElementById('googleClientIdInput').value.trim();
+  try{ localStorage.setItem('googleClientId_v1', val); }catch(e){}
+  alert(t('alert_saved'));
+}
+async function startGoogleSignIn(){
+  const clientId = getGoogleClientId();
+  const statusEl = document.getElementById('gmailStatusText');
+  if(!clientId){ statusEl.textContent = t('gmail_need_clientid'); return; }
+  statusEl.textContent = t('gmail_connecting');
+  try{
+    await loadScriptOnce('https://accounts.google.com/gsi/client');
+    if(!gTokenClient){
+      gTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+        callback: async (resp)=>{
+          if(resp.error){ statusEl.textContent = t('gmail_login_fail'); return; }
+          gAccessToken = resp.access_token;
+          await onGoogleSignedIn();
+        }
+      });
+    }
+    gTokenClient.requestAccessToken();
+  }catch(e){
+    statusEl.textContent = t('gmail_login_fail');
+  }
+}
+async function onGoogleSignedIn(){
+  const statusEl = document.getElementById('gmailStatusText');
+  try{
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{Authorization:'Bearer '+gAccessToken}});
+    const info = await res.json();
+    document.getElementById('gmailSignedOut').style.display = 'none';
+    document.getElementById('gmailSignedIn').style.display = 'block';
+    document.getElementById('gmailAvatar').src = info.picture || '';
+    document.getElementById('gmailName').textContent = info.name || info.email || '';
+    document.getElementById('gmailEmail').textContent = info.email || '';
+    statusEl.textContent = '';
+  }catch(e){
+    statusEl.textContent = t('gmail_login_fail');
+  }
+}
+function googleSignOut(){
+  try{ if(gAccessToken && window.google) google.accounts.oauth2.revoke(gAccessToken, ()=>{}); }catch(e){}
+  gAccessToken = null;
+  document.getElementById('gmailSignedOut').style.display = 'block';
+  document.getElementById('gmailSignedIn').style.display = 'none';
+  document.getElementById('gmailStatusText').textContent = '';
+}
+const BACKUP_KEYS = ['moneyAppData_v1','myName_v1','customLogo_v1','appLang_v1','appTheme_v1'];
+async function findDriveBackupFileId(){
+  const q = encodeURIComponent("name='fintrack_backup.json'");
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name)`, {
+    headers:{Authorization:'Bearer '+gAccessToken}
+  });
+  const j = await res.json();
+  return (j.files && j.files[0]) ? j.files[0].id : null;
+}
+async function backupToDrive(){
+  const statusEl = document.getElementById('gmailStatusText');
+  if(!gAccessToken){ statusEl.textContent = t('gmail_need_login'); return; }
+  statusEl.textContent = t('gmail_backing_up');
+  try{
+    const payload = {};
+    BACKUP_KEYS.forEach(k=>{ try{ const v = localStorage.getItem(k); if(v!==null) payload[k]=v; }catch(e){} });
+    const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+    const fileId = await findDriveBackupFileId();
+    const metadata = {name:'fintrack_backup.json', mimeType:'application/json'};
+    if(!fileId) metadata.parents = ['appDataFolder'];
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+    form.append('file', blob);
+    const url = fileId
+      ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+      : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const res = await fetch(url, {method: fileId?'PATCH':'POST', headers:{Authorization:'Bearer '+gAccessToken}, body: form});
+    if(!res.ok) throw new Error('upload failed');
+    statusEl.textContent = t('gmail_backup_done');
+  }catch(e){
+    statusEl.textContent = t('gmail_backup_fail');
+  }
+}
+async function restoreFromDrive(){
+  const statusEl = document.getElementById('gmailStatusText');
+  if(!gAccessToken){ statusEl.textContent = t('gmail_need_login'); return; }
+  if(!confirm(t('gmail_restore_confirm'))) return;
+  statusEl.textContent = t('gmail_restoring');
+  try{
+    const fileId = await findDriveBackupFileId();
+    if(!fileId){ statusEl.textContent = t('gmail_no_backup'); return; }
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {headers:{Authorization:'Bearer '+gAccessToken}});
+    const payload = await res.json();
+    Object.keys(payload).forEach(k=>{ try{ localStorage.setItem(k, payload[k]); }catch(e){} });
+    statusEl.textContent = t('gmail_restore_done');
+    setTimeout(()=> location.reload(), 900);
+  }catch(e){
+    statusEl.textContent = t('gmail_restore_fail');
+  }
+}
+
+// ---- Custom app logo ----
+function handleLogoUpload(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const dataUrl = e.target.result;
+    try{ localStorage.setItem('customLogo_v1', dataUrl); }catch(err){}
+    applyCustomLogo(dataUrl);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+function applyCustomLogo(dataUrl){
+  document.getElementById('loginLogoEl').innerHTML = `<img src="${dataUrl}" alt="logo">`;
+  document.getElementById('headerLogoEl').innerHTML = `<img src="${dataUrl}" alt="logo">`;
+  document.getElementById('logoPreviewEmoji').style.display = 'none';
+  const pi = document.getElementById('logoPreviewImg');
+  pi.src = dataUrl; pi.style.display = 'block';
+  document.getElementById('logoResetBtn').style.display = 'block';
+}
+function resetLogo(){
+  try{ localStorage.removeItem('customLogo_v1'); }catch(e){}
+  document.getElementById('loginLogoEl').innerHTML = '💰';
+  document.getElementById('headerLogoEl').innerHTML = '💰';
+  document.getElementById('logoPreviewEmoji').style.display = 'inline';
+  document.getElementById('logoPreviewImg').style.display = 'none';
+  document.getElementById('logoResetBtn').style.display = 'none';
+}
+function loadSavedLogo(){
+  let saved = '';
+  try{ saved = localStorage.getItem('customLogo_v1') || ''; }catch(e){}
+  if(saved) applyCustomLogo(saved);
+}
+
 // ---- Biometric app lock (WebAuthn) ----
 function b64urlEncode(buf){
   return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1220,38 +1493,138 @@ function loginContinue(){
   checkLockOnLoad();
 }
 
-// ---- AI Chat assistant (fully local, rule-based) ----
+// ---- AI Chat assistant (fully local, rule-based, can log transactions) ----
 let chatMessages = [];
+let lastChatTxId = null;
 function renderChat(){
   if(!chatMessages.length){ chatMessages.push({who:'bot', text:t('chat_greet')}); }
   const log = document.getElementById('chatLog');
   log.innerHTML = chatMessages.map(m=>`<div class="chatmsg ${m.who}">${esc(m.text)}</div>`).join('');
   log.scrollTop = log.scrollHeight;
 }
+function parseAmountFromText(msg){
+  const bnDigits = '০১২৩৪৫৬৭৮৯';
+  let s = '';
+  for(const ch of msg){ const i = bnDigits.indexOf(ch); s += i>=0 ? i : ch; }
+  const m = s.match(/(\d+(?:\.\d+)?)/);
+  return m ? parseFloat(m[1]) : null;
+}
+function knownPersons(){
+  const set = new Set();
+  data.transactions.forEach(tx=>{ if(tx.person) set.add(tx.person); });
+  return [...set];
+}
+function extractPersonFromText(msg){
+  for(const p of knownPersons()){ if(msg.includes(p)) return p; }
+  let m = msg.match(/([^\s,।]{2,20}?)কে\b/);
+  if(m) return m[1];
+  m = msg.match(/([^\s,।]{2,20}?)(?:র|এর)?\s*কাছ\s*থেকে/);
+  if(m) return m[1].replace(/(র|এর)$/,'');
+  m = msg.match(/(?:from|to)\s+([A-Za-z][A-Za-z\s]{1,20}?)(?:\s|$)/i);
+  if(m) return m[1].trim();
+  return null;
+}
+function extractCategoryFromText(msg){
+  return data.categories.find(c=> msg.includes(c)) || null;
+}
+function extractAccountFromText(msg){
+  return data.accounts.find(a=> msg.includes(a)) || null;
+}
+function detectChatIntent(msg){
+  const q = msg, ql = msg.toLowerCase();
+  const has = arr=> arr.some(k=> q.includes(k) || ql.includes(k.toLowerCase()));
+  const isReturn = has(['ফেরত','শোধ','shodh','repaid','paid back']);
+  if(has(['ধার','লোন','ঋণ','loan','borrow','lent'])){
+    if(isReturn){
+      if(has(['পেলাম','পাওনা','got back','received'])) return 'loan_repay_given';
+      if(has(['দিলাম','দিয়েছি','paid'])) return 'loan_repay_taken';
+    }
+    if(has(['দিলাম','দিয়েছি','gave'])) return 'loan_given';
+    if(has(['নিলাম','নিয়েছি','took','borrowed'])) return 'loan_taken';
+  }
+  if(has(['একাউন্ট','account'])){
+    if(has(['জমা','রাখলাম','save','saved'])) return 'save_to_account';
+    if(has(['তুললাম','উঠ','withdraw'])) return 'use_from_account';
+  }
+  if(has(['খরচ','কিনলাম','ব্যয়','spent','spend','bought','paid for'])) return 'expense';
+  if(has(['জমা','ইনকাম','আয়','পেলাম','income','earned','salary','deposit'])) return 'deposit';
+  return null;
+}
+function addTxFromChat(type, msg){
+  const meta = TYPE_META[type];
+  const amount = parseAmountFromText(msg);
+  if(!amount || amount<=0) return t('chat_need_amount');
+  let category = null, person = null, account = null;
+  if(meta.needsCat) category = extractCategoryFromText(msg) || data.categories[0];
+  if(meta.needsPerson){
+    person = extractPersonFromText(msg);
+    if(!person) return t('chat_need_person');
+  }
+  if(meta.needsAccount) account = extractAccountFromText(msg) || data.accounts[0];
+  if(type==='use_from_account'){
+    const bal = calcAccountBalances()[account] || 0;
+    if(amount > bal) return `${account}${t('alert_insufficient')}${fmt(bal)}`;
+  }
+  const tx = {
+    id: Date.now()+'-'+Math.random().toString(36).slice(2,7),
+    type, amount, category, person, account,
+    note: '', date: todayStr(), time: nowTime()
+  };
+  data.transactions.push(tx);
+  saveData();
+  lastChatTxId = tx.id;
+  renderDash(); renderAccounts(); renderLoans(); renderHistory(); populatePersonList();
+  let resp = '✅ ' + t(meta.label) + ': ' + fmt(amount);
+  if(category) resp += ' (' + category + ')';
+  if(person) resp += ' — ' + person;
+  if(account) resp += ' — ' + account;
+  resp += '। ' + t('chat_undo_hint');
+  return resp;
+}
+function undoLastChatTx(){
+  if(!lastChatTxId) return t('chat_undo_none');
+  data.transactions = data.transactions.filter(tx=>tx.id!==lastChatTxId);
+  saveData();
+  lastChatTxId = null;
+  renderDash(); renderAccounts(); renderLoans(); renderHistory(); populatePersonList();
+  return t('chat_undo_done');
+}
 function getAIResponse(msg){
-  const q = msg.toLowerCase();
+  const q = msg, ql = msg.toLowerCase();
+  if(q.includes('ফিরিয়ে নাও') || q.includes('মুছে দাও') || ql.includes('undo')){
+    return undoLastChatTx();
+  }
+  const intent = detectChatIntent(msg);
+  if(intent) return addTxFromChat(intent, msg);
+
   const {getMap, oweMap} = calcLoans();
   const totalOwe = Object.values(oweMap).reduce((s,v)=>s+Math.max(v,0),0);
   const totalGet = Object.values(getMap).reduce((s,v)=>s+Math.max(v,0),0);
-  if(q.includes('ব্যালেন্স') || q.includes('balance')){
+  if(q.includes('ব্যালেন্স') || ql.includes('balance')){
     return t('chat_balance') + fmt(calcBalance());
   }
-  if(q.includes('খরচ') || q.includes('expense') || q.includes('spend')){
+  if(q.includes('খরচ') || ql.includes('expense') || ql.includes('spend')){
     const catMap = calcByCategory();
     const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
     let resp = t('chat_expense') + fmt(calcTotalExpense());
     if(entries.length) resp += '। ' + t('chat_top_cat') + entries[0][0] + ' (' + fmt(entries[0][1]) + ')';
     return resp;
   }
-  if(q.includes('লোন') || q.includes('loan') || q.includes('পাওনা') || q.includes('owe')){
+  if(q.includes('লোন') || ql.includes('loan') || q.includes('পাওনা') || ql.includes('owe')){
     if(!totalOwe && !totalGet) return t('chat_no_data');
     return t('chat_owe') + fmt(totalOwe) + '। ' + t('chat_get') + fmt(totalGet);
   }
-  if(q.includes('খাত') || q.includes('categor')){
+  if(q.includes('খাত') || ql.includes('categor')){
     const catMap = calcByCategory();
     const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
     if(!entries.length) return t('chat_no_data');
     return t('chat_top_cat') + entries[0][0] + ' (' + fmt(entries[0][1]) + ')';
+  }
+  if(q.includes('একাউন্ট') || ql.includes('account')){
+    const map = calcAccountBalances();
+    const entries = Object.entries(map);
+    if(!entries.length) return t('chat_no_data');
+    return entries.map(([a,v])=> a+': '+fmt(v)).join('। ');
   }
   return t('chat_fallback');
 }
@@ -1273,6 +1646,8 @@ updateFormVisibility();
 document.getElementById('inDate').value = todayStr();
 document.getElementById('inTime').value = nowTime();
 document.getElementById('myNameInput').value = getMyName();
+document.getElementById('googleClientIdInput').value = getGoogleClientId();
+loadSavedLogo();
 populatePersonList();
 let savedTheme = '';
 try{ savedTheme = localStorage.getItem('appTheme_v1') || ''; }catch(e){}
