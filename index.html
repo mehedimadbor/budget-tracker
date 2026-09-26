@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FinTrack">
+<meta name="apple-mobile-web-app-title" content="আমার হিসাব">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='55' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%B0%20%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22short_name%22%3A%22%E0%A6%B9%E0%A6%BF%E0%A6%B8%E0%A6%BE%E0%A6%AC%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%23f4f5f7%22%2C%22theme_color%22%3A%22%232563eb%22%7D">
-<title>FinTrack</title>
+<title>আমার হিসাব</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -179,7 +179,7 @@ details.gsetup summary::-webkit-details-marker{display:none;}
 .bnbtn.fab:active .fabcircle{transform:scale(0.92);}
 .bnbtn.fab .fabcircle svg{width:21px; height:21px; stroke:#fff; stroke-width:2.3;}
 .chatlog{display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow-y:auto; margin-bottom:10px;}
-.chatmsg{max-width:82%; padding:9px 12px; border-radius:14px; font-size:13.5px; line-height:1.4;}
+.chatmsg{max-width:82%; padding:9px 12px; border-radius:14px; font-size:13.5px; line-height:1.4; white-space:pre-line;}
 .chatmsg.bot{background:var(--bg); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px;}
 .chatmsg.user{background:var(--primary); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
 .chatinputrow{display:flex; gap:8px;}
@@ -218,7 +218,7 @@ details.gsetup summary::-webkit-details-marker{display:none;}
 </div>
 <div id="printArea"></div>
 <div class="wrap">
-<header class="top"><h1><span id="headerLogoEl"></span> <span data-i18n="app_title">FinTrack</span></h1>
+<header class="top"><h1><span id="headerLogoEl">💰</span> <span data-i18n="app_title">আমার হিসাব</span></h1>
   <div class="cards">
     <div class="card bal"><div class="lbl" data-i18n="lbl_total_balance">মোট ব্যালেন্স</div><div class="val" id="balVal">৳0</div></div>
     <div class="card exp"><div class="lbl" data-i18n="lbl_total_expense">মোট খরচ</div><div class="val" id="expVal">৳0</div></div>
@@ -396,39 +396,35 @@ details.gsetup summary::-webkit-details-marker{display:none;}
   </div>
   <div class="box">
     <h3 data-i18n="settings_profile">প্রোফাইল</h3>
-    <p style="font-size:12.5px; color:var(--muted); margin:0 0 6px;" data-i18n="profile_note">নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।</p>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 6px;" data-i18n="profile_note">নিচে তথ্য দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।</p>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      <div id="profilePicWrap" style="width:56px; height:56px; border-radius:50%; overflow:hidden; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; background:var(--bg); flex-shrink:0;">
+        <span id="profilePicEmoji" style="font-size:26px;">🙂</span>
+        <img id="profilePicImg" style="display:none; width:100%; height:100%; object-fit:cover;">
+      </div>
+      <div style="flex:1;">
+        <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="handleProfilePicUpload(this)">
+        <button class="typebtn" style="width:100%;" onclick="document.getElementById('profilePicInput').click()" data-i18n="btn_change_photo">ছবি পরিবর্তন করুন</button>
+      </div>
+    </div>
+    <button class="typebtn" id="profilePicResetBtn" style="width:100%; display:none; margin-bottom:8px;" onclick="resetProfilePic()" data-i18n="btn_reset_photo">ছবি সরিয়ে দিন</button>
     <label data-i18n="lbl_your_name">আপনার নাম</label>
     <input type="text" id="myNameInput" data-i18n-ph="ph_your_name" placeholder="যেমন: করিম">
+    <label data-i18n="lbl_username">ইউজারনেম</label>
+    <input type="text" id="myUsernameInput" data-i18n-ph="ph_username" placeholder="যেমন: karim123">
+    <label data-i18n="lbl_phone">মোবাইল নম্বর</label>
+    <input type="tel" id="myPhoneInput" data-i18n-ph="ph_phone" placeholder="যেমন: 01XXXXXXXXX">
     <button class="typebtn" style="width:100%; margin-top:8px;" onclick="saveMyName()" data-i18n="btn_save">সংরক্ষণ করুন</button>
   </div>
   <div class="box">
-    <h3 data-i18n="gmail_heading">🔐 Google একাউন্ট (Login ও ব্যাকআপ)</h3>
-    <p style="font-size:12.5px; color:var(--muted); margin:0 0 8px;" data-i18n="gmail_note">এই অ্যাপের কোনো সার্ভার নেই, তাই আপনার Google একাউন্ট দিয়ে Login করলে সব হিসাব সরাসরি আপনার নিজের Google Drive-এ ব্যাকআপ থাকবে — অন্য ফোনে বসালে Restore করে ফিরিয়ে আনা যাবে।</p>
-    <div id="gmailSignedOut">
-      <button class="main" style="margin-top:0;" onclick="startGoogleSignIn()" data-i18n="btn_google_login">Google দিয়ে Login করুন</button>
+    <h3 data-i18n="backup_heading">💾 লোকাল ব্যাকআপ</h3>
+    <p style="font-size:12.5px; color:var(--muted); margin:0 0 8px;" data-i18n="backup_note">এই অ্যাপের কোনো সার্ভার নেই — আপনার সব হিসাব শুধু এই ফোনেই থাকে। নিয়মিত একটা ব্যাকআপ ফাইল ডাউনলোড করে রাখুন (Google Drive, ফাইল ম্যানেজার বা যেকোনো জায়গায় সংরক্ষণ করতে পারেন), অন্য ফোনে বা অ্যাপ রিসেট হলে সেই ফাইল দিয়ে সব ফিরিয়ে আনতে পারবেন।</p>
+    <div class="row2">
+      <button class="typebtn" onclick="downloadBackup()" data-i18n="btn_backup_download">⬇️ ব্যাকআপ ডাউনলোড করুন</button>
+      <button class="typebtn" onclick="document.getElementById('restoreFileInput').click()" data-i18n="btn_restore_file">⬆️ ব্যাকআপ ফিরিয়ে আনুন</button>
     </div>
-    <div id="gmailSignedIn" style="display:none;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-        <img id="gmailAvatar" style="width:38px; height:38px; border-radius:50%; background:var(--bg);" alt="">
-        <div>
-          <div id="gmailName" style="font-size:13.5px; font-weight:600;"></div>
-          <div id="gmailEmail" style="font-size:12px; color:var(--muted);"></div>
-        </div>
-      </div>
-      <div class="row2">
-        <button class="typebtn" onclick="backupToDrive()" data-i18n="btn_backup_now">এখনই ব্যাকআপ নিন</button>
-        <button class="typebtn" onclick="restoreFromDrive()" data-i18n="btn_restore_backup">ব্যাকআপ ফিরিয়ে আনুন</button>
-      </div>
-      <button class="typebtn" style="width:100%; margin-top:8px;" onclick="googleSignOut()" data-i18n="btn_google_logout">Logout করুন</button>
-    </div>
-    <div id="gmailStatusText" style="font-size:12.5px; color:var(--primary); margin-top:8px;"></div>
-    <details class="gsetup">
-      <summary data-i18n="gmail_setup_toggle">⚙️ ডেভেলপার সেটআপ (একবারই লাগবে)</summary>
-      <p style="font-size:12px; color:var(--muted); margin:8px 0;" data-i18n="gmail_setup_note">Google Login কাজ করাতে হলে আপনার নিজের একটা Google Cloud OAuth Client ID লাগবে (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, Authorized JavaScript origin হিসেবে এই অ্যাপটা যেখানে হোস্ট করা আছে সেই ঠিকানা দিন)। তারপর সেই Client ID নিচে বসিয়ে সংরক্ষণ করুন।</p>
-      <label data-i18n="lbl_google_clientid">Google Client ID</label>
-      <input type="text" id="googleClientIdInput" placeholder="xxxxx.apps.googleusercontent.com">
-      <button class="typebtn" style="width:100%; margin-top:8px;" onclick="saveGoogleClientId()" data-i18n="btn_save">সংরক্ষণ করুন</button>
-    </details>
+    <input type="file" id="restoreFileInput" accept="application/json" style="display:none;" onchange="restoreFromFile(this)">
+    <div id="backupStatusText" style="font-size:12.5px; color:var(--primary); margin-top:8px;"></div>
   </div>
   <div class="box">
     <h3 data-i18n="settings_logo">🖼️ অ্যাপ লোগো</h3>
@@ -542,22 +538,18 @@ const I18N = {
     loan_people_owe_me:'যাদের কাছে আমি পাবো', loan_people_i_owe:'যাদের আমি পাওনা দিবো',
     hist_month:'মাস', hist_show_all:'সব দেখুন', hist_print:'🖨️ প্রিন্ট করুন',
     settings_theme:'থিম', settings_lang:'ভাষা', settings_profile:'প্রোফাইল',
-    profile_note:'নিচে নাম দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।',
+    profile_note:'নিচে তথ্য দিয়ে রাখুন, QR শেয়ার করার সময় বন্ধুরা এই নামে আপনাকে চিনবে।',
     lbl_your_name:'আপনার নাম', ph_your_name:'যেমন: করিম',
-    gmail_heading:'🔐 Google একাউন্ট (Login ও ব্যাকআপ)',
-    gmail_note:'এই অ্যাপের কোনো সার্ভার নেই, তাই আপনার Google একাউন্ট দিয়ে Login করলে সব হিসাব সরাসরি আপনার নিজের Google Drive-এ ব্যাকআপ থাকবে — অন্য ফোনে বসালে Restore করে ফিরিয়ে আনা যাবে।',
-    btn_google_login:'Google দিয়ে Login করুন', btn_google_logout:'Logout করুন',
-    btn_backup_now:'এখনই ব্যাকআপ নিন', btn_restore_backup:'ব্যাকআপ ফিরিয়ে আনুন',
-    gmail_setup_toggle:'⚙️ ডেভেলপার সেটআপ (একবারই লাগবে)',
-    gmail_setup_note:'Google Login কাজ করাতে হলে আপনার নিজের একটা Google Cloud OAuth Client ID লাগবে (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, Authorized JavaScript origin হিসেবে এই অ্যাপটা যেখানে হোস্ট করা আছে সেই ঠিকানা দিন)। তারপর সেই Client ID নিচে বসিয়ে সংরক্ষণ করুন।',
-    lbl_google_clientid:'Google Client ID',
-    gmail_need_clientid:'আগে নিচে ডেভেলপার সেটআপ থেকে Google Client ID বসিয়ে সংরক্ষণ করুন।',
-    gmail_connecting:'সংযুক্ত হচ্ছে...', gmail_login_fail:'Login ব্যর্থ হয়েছে, আবার চেষ্টা করুন।',
-    gmail_need_login:'আগে Google দিয়ে Login করুন।',
-    gmail_backing_up:'ব্যাকআপ নেওয়া হচ্ছে...', gmail_backup_done:'✅ ব্যাকআপ সফল হয়েছে।', gmail_backup_fail:'ব্যাকআপ ব্যর্থ হয়েছে, আবার চেষ্টা করুন।',
-    gmail_restore_confirm:'ব্যাকআপ থেকে ফিরিয়ে আনলে এই ডিভাইসের বর্তমান হিসাব বদলে যাবে। এগিয়ে যাবেন?',
-    gmail_restoring:'ফিরিয়ে আনা হচ্ছে...', gmail_restore_done:'✅ সফলভাবে ফিরিয়ে আনা হয়েছে, রিলোড হচ্ছে...',
-    gmail_restore_fail:'ফিরিয়ে আনতে ব্যর্থ হয়েছে।', gmail_no_backup:'কোনো ব্যাকআপ পাওয়া যায়নি।',
+    lbl_username:'ইউজারনেম', ph_username:'যেমন: karim123',
+    lbl_phone:'মোবাইল নম্বর', ph_phone:'যেমন: 01XXXXXXXXX',
+    btn_change_photo:'ছবি পরিবর্তন করুন', btn_reset_photo:'ছবি সরিয়ে দিন',
+    backup_heading:'💾 লোকাল ব্যাকআপ',
+    backup_note:'এই অ্যাপের কোনো সার্ভার নেই — আপনার সব হিসাব শুধু এই ফোনেই থাকে। নিয়মিত একটা ব্যাকআপ ফাইল ডাউনলোড করে রাখুন, অন্য ফোনে বা অ্যাপ রিসেট হলে সেই ফাইল দিয়ে সব ফিরিয়ে আনতে পারবেন।',
+    btn_backup_download:'⬇️ ব্যাকআপ ডাউনলোড করুন', btn_restore_file:'⬆️ ব্যাকআপ ফিরিয়ে আনুন',
+    backup_download_done:'✅ ব্যাকআপ ফাইল ডাউনলোড হয়েছে।',
+    backup_restore_confirm:'ব্যাকআপ থেকে ফিরিয়ে আনলে এই ডিভাইসের বর্তমান হিসাব বদলে যাবে। এগিয়ে যাবেন?',
+    backup_restore_done:'✅ সফলভাবে ফিরিয়ে আনা হয়েছে, রিলোড হচ্ছে...',
+    backup_restore_fail:'❌ ফাইলটি ঠিক নয় বা পড়া যায়নি। আবার চেষ্টা করুন।',
     settings_logo:'🖼️ অ্যাপ লোগো', logo_note:'চাইলে অ্যাপের ডিফল্ট লোগোর বদলে নিজের ছবি বা লোগো বসাতে পারেন। এটা লগইন স্ক্রিন ও উপরের টাইটেলে দেখাবে।',
     btn_change_logo:'লোগো পরিবর্তন করুন', btn_reset_logo:'ডিফল্ট লোগোতে ফিরে যান',
     lock_heading:'🔒 অ্যাপ লক (ফিঙ্গারপ্রিন্ট)', lock_note:'চালু করলে অ্যাপ খোলার সময় আপনার ফোনের ফিঙ্গারপ্রিন্ট বা ফেস আনলক দিয়ে যাচাই করতে হবে।',
@@ -585,14 +577,17 @@ const I18N = {
     login_tag:'আপনার আর্থিক হিসাবের সঙ্গী', btn_get_started:'শুরু করুন',
     bn_home:'হোম', bn_expense:'খরচ', bn_chat:'AI চ্যাট', bn_deposit:'যোগ করুন', bn_notif:'লোন / নোটিফিকেশন', bn_profile:'প্রোফাইল',
     chat_heading:'🤖 AI অ্যাসিস্ট্যান্ট', ph_chat_input:'যেমন: এই মাসে কত খরচ হয়েছে?', btn_send_chat:'পাঠান',
-    chat_greet:'হ্যালো! আমি আপনার হিসাব সম্পর্কে বলতে পারি (ব্যালেন্স, খরচ, লোন) — আবার সরাসরি লিখলে হিসাবও যোগ করে দিতে পারি। যেমন: "রহিমকে ৫০০ টাকা ধার দিলাম" বা "৩০০ টাকা খাবারে খরচ হলো"।',
+    chat_greet:'হ্যালো! আমি আপনার হিসাব সম্পর্কে বলতে পারি (ব্যালেন্স, খরচ, লোন, হিস্ট্রি) — সরাসরি লিখলে হিসাবও যোগ করে দিতে পারি, আবার মুছেও দিতে পারি। যেমন: "রহিমকে ৫০০ টাকা ধার দিলাম", "৩০০ টাকা খাবারে খরচ হলো", "হিস্ট্রি দেখাও", "রহিমের কাছে কত পাবো"।',
     chat_balance:'আপনার মোট ব্যালেন্স হলো ', chat_expense:'এখন পর্যন্ত মোট খরচ হয়েছে ',
     chat_owe:'আপনি মোট পাওনা দেবেন ', chat_get:'আপনি মোট পাবেন ',
     chat_top_cat:'সবচেয়ে বেশি খরচ হয়েছে এই খাতে: ', chat_no_data:'এখনো যথেষ্ট তথ্য নেই',
     chat_need_amount:'পরিমাণটা বুঝতে পারিনি — টাকার অংক দিয়ে আবার লিখুন, যেমন: "৫০০ টাকা খরচ হলো খাবারে"।',
     chat_need_person:'কার সাথে এই লেনদেন, নামটা বলুন — যেমন: "রহিমকে ৫০০ টাকা ধার দিলাম"।',
     chat_undo_hint:'ভুল হলে লিখুন "ফিরিয়ে নাও"।', chat_undo_done:'✅ শেষ এন্ট্রিটা মুছে ফেলা হয়েছে।', chat_undo_none:'ফিরিয়ে নেওয়ার মতো কিছু নেই।',
-    chat_fallback:'দুঃখিত, এটা বুঝতে পারিনি। "ব্যালেন্স", "খরচ", "লোন", "খাত" জিজ্ঞাসা করুন, অথবা সরাসরি লিখুন — যেমন "৫০০ টাকা জমা হলো" বা "রহিমের কাছ থেকে ২০০ টাকা ধার নিলাম"।'
+    chat_history_intro:'📋 সাম্প্রতিক লেনদেনগুলো:', chat_history_hint:'একটা এন্ট্রি মুছতে শুধু তার নম্বরটা লিখুন, যেমন: "২"।',
+    chat_deleted_one:'✅ এন্ট্রিটি মুছে ফেলা হয়েছে।', chat_need_valid_number:'তালিকায় থাকা একটা সঠিক নম্বর দিন।',
+    chat_owes_you_suffix:'-এর কাছে আপনি পাবেন ', chat_you_owe_suffix:'-কে আপনি পাওনা দিবেন ',
+    chat_fallback:'দুঃখিত, এটা বুঝতে পারিনি। "ব্যালেন্স", "খরচ", "লোন", "খাত", "হিস্ট্রি" জিজ্ঞাসা করুন, অথবা সরাসরি লিখুন — যেমন "৫০০ টাকা জমা হলো" বা "রহিমের কাছ থেকে ২০০ টাকা ধার নিলাম"।'
   },
   en:{
     app_title:'My Accounts', lbl_total_balance:'Total Balance', lbl_total_expense:'Total Expense',
@@ -616,22 +611,18 @@ const I18N = {
     loan_people_owe_me:'People who owe me', loan_people_i_owe:'People I owe',
     hist_month:'Month', hist_show_all:'Show All', hist_print:'🖨️ Print',
     settings_theme:'Theme', settings_lang:'Language', settings_profile:'Profile',
-    profile_note:"Set a name below; friends will see it when you share a QR.",
+    profile_note:"Set your details below; friends will see your name when you share a QR.",
     lbl_your_name:'Your Name', ph_your_name:'e.g. Karim',
-    gmail_heading:'🔐 Google Account (Login & Backup)',
-    gmail_note:"This app has no server, so signing in with Google backs up your data straight to your own Google Drive — you can restore it later on another phone.",
-    btn_google_login:'Login with Google', btn_google_logout:'Log out',
-    btn_backup_now:'Backup Now', btn_restore_backup:'Restore Backup',
-    gmail_setup_toggle:'⚙️ Developer setup (one-time)',
-    gmail_setup_note:'To make Google Login work you need your own Google Cloud OAuth Client ID (Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID → Web application, set the Authorized JavaScript origin to wherever this app is hosted). Paste that Client ID below and save.',
-    lbl_google_clientid:'Google Client ID',
-    gmail_need_clientid:'First set a Google Client ID in Developer setup below and save it.',
-    gmail_connecting:'Connecting...', gmail_login_fail:'Login failed, please try again.',
-    gmail_need_login:'Please log in with Google first.',
-    gmail_backing_up:'Backing up...', gmail_backup_done:'✅ Backup successful.', gmail_backup_fail:'Backup failed, please try again.',
-    gmail_restore_confirm:'Restoring will overwrite the current data on this device. Continue?',
-    gmail_restoring:'Restoring...', gmail_restore_done:'✅ Restored successfully, reloading...',
-    gmail_restore_fail:'Restore failed.', gmail_no_backup:'No backup found.',
+    lbl_username:'Username', ph_username:'e.g. karim123',
+    lbl_phone:'Mobile Number', ph_phone:'e.g. 01XXXXXXXXX',
+    btn_change_photo:'Change Photo', btn_reset_photo:'Remove Photo',
+    backup_heading:'💾 Local Backup',
+    backup_note:"This app has no server — all your data stays on this phone only. Download a backup file regularly, and use it to restore everything on another phone or after a reset.",
+    btn_backup_download:'⬇️ Download Backup', btn_restore_file:'⬆️ Restore Backup',
+    backup_download_done:'✅ Backup file downloaded.',
+    backup_restore_confirm:'Restoring will overwrite the current data on this device. Continue?',
+    backup_restore_done:'✅ Restored successfully, reloading...',
+    backup_restore_fail:'❌ That file is invalid or unreadable. Please try again.',
     settings_logo:'🖼️ App Logo', logo_note:"Swap the app's default logo for your own image or brand mark. It'll show on the login screen and the top title.",
     btn_change_logo:'Change Logo', btn_reset_logo:'Reset to Default Logo',
     lock_heading:'🔒 App Lock (Fingerprint)', lock_note:"When enabled, you'll need to verify with your phone's fingerprint or face unlock to open the app.",
@@ -659,14 +650,17 @@ const I18N = {
     login_tag:'Your personal finance companion', btn_get_started:'Get Started',
     bn_home:'Home', bn_expense:'Expense', bn_chat:'AI Chat', bn_deposit:'Add', bn_notif:'Loan / Notifications', bn_profile:'Profile',
     chat_heading:'🤖 AI Assistant', ph_chat_input:'e.g. How much did I spend this month?', btn_send_chat:'Send',
-    chat_greet:"Hi! Ask me about your accounts (balance, expenses, loans) — or just tell me a transaction and I'll log it. e.g. \"gave Rahim a loan of 500 taka\" or \"spent 300 on food\".",
+    chat_greet:"Hi! Ask me about your accounts (balance, expenses, loans, history) — tell me a transaction and I'll log it, or ask me to delete one. e.g. \"gave Rahim a loan of 500 taka\", \"spent 300 on food\", \"show history\", \"how much does Rahim owe me\".",
     chat_balance:'Your total balance is ', chat_expense:'Total expense so far is ',
     chat_owe:'You owe a total of ', chat_get:'You are owed a total of ',
     chat_top_cat:'Your highest spending category is: ', chat_no_data:'Not enough data yet',
     chat_need_amount:'I couldn\'t catch the amount — try again with a number, e.g. "spent 500 on food".',
     chat_need_person:"Who's this transaction with? e.g. \"gave Rahim a loan of 500\".",
     chat_undo_hint:'If that was wrong, just say "undo".', chat_undo_done:'✅ Last entry removed.', chat_undo_none:'Nothing to undo.',
-    chat_fallback:"Sorry, I didn't get that. Ask about \"balance\", \"expense\", \"loan\" or \"category\" — or just tell me a transaction, e.g. \"deposited 500\" or \"took a loan of 200 from Rahim\"."
+    chat_history_intro:'📋 Recent transactions:', chat_history_hint:'To delete an entry, just type its number, e.g. "2".',
+    chat_deleted_one:'✅ Entry deleted.', chat_need_valid_number:'Please give a valid number from the list.',
+    chat_owes_you_suffix:' owes you ', chat_you_owe_suffix:', you owe ',
+    chat_fallback:"Sorry, I didn't get that. Ask about \"balance\", \"expense\", \"loan\", \"category\" or \"history\" — or just tell me a transaction, e.g. \"deposited 500\" or \"took a loan of 200 from Rahim\"."
   }
 };
 let currentLang = 'bn';
@@ -1076,125 +1070,89 @@ function applyLanguage(lang){
 function getMyName(){
   try{ return localStorage.getItem('myName_v1') || ''; }catch(e){ return ''; }
 }
+function getMyUsername(){
+  try{ return localStorage.getItem('myUsername_v1') || ''; }catch(e){ return ''; }
+}
+function getMyPhone(){
+  try{ return localStorage.getItem('myPhone_v1') || ''; }catch(e){ return ''; }
+}
 function saveMyName(){
   const val = document.getElementById('myNameInput').value.trim();
-  try{ localStorage.setItem('myName_v1', val); }catch(e){}
+  const uname = document.getElementById('myUsernameInput').value.trim();
+  const phone = document.getElementById('myPhoneInput').value.trim();
+  try{
+    localStorage.setItem('myName_v1', val);
+    localStorage.setItem('myUsername_v1', uname);
+    localStorage.setItem('myPhone_v1', phone);
+  }catch(e){}
   alert(t('alert_saved'));
 }
 
-// ---- Google Sign-In & Drive backup ----
-function loadScriptOnce(src){
-  return new Promise((resolve,reject)=>{
-    if(document.querySelector(`script[src="${src}"]`)){ resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = ()=>resolve(); s.onerror = ()=>reject(new Error('load fail'));
-    document.head.appendChild(s);
-  });
+// ---- Profile photo ----
+function handleProfilePicUpload(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const dataUrl = e.target.result;
+    try{ localStorage.setItem('myProfilePic_v1', dataUrl); }catch(err){}
+    applyProfilePic(dataUrl);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
 }
-let gAccessToken = null;
-let gTokenClient = null;
-function getGoogleClientId(){
-  try{ return localStorage.getItem('googleClientId_v1') || ''; }catch(e){ return ''; }
+function applyProfilePic(dataUrl){
+  document.getElementById('profilePicEmoji').style.display = 'none';
+  const pi = document.getElementById('profilePicImg');
+  pi.src = dataUrl; pi.style.display = 'block';
+  document.getElementById('profilePicResetBtn').style.display = 'block';
 }
-function saveGoogleClientId(){
-  const val = document.getElementById('googleClientIdInput').value.trim();
-  try{ localStorage.setItem('googleClientId_v1', val); }catch(e){}
-  alert(t('alert_saved'));
+function resetProfilePic(){
+  try{ localStorage.removeItem('myProfilePic_v1'); }catch(e){}
+  document.getElementById('profilePicEmoji').style.display = 'inline';
+  document.getElementById('profilePicImg').style.display = 'none';
+  document.getElementById('profilePicResetBtn').style.display = 'none';
 }
-async function startGoogleSignIn(){
-  const clientId = getGoogleClientId();
-  const statusEl = document.getElementById('gmailStatusText');
-  if(!clientId){ statusEl.textContent = t('gmail_need_clientid'); return; }
-  statusEl.textContent = t('gmail_connecting');
-  try{
-    await loadScriptOnce('https://accounts.google.com/gsi/client');
-    if(!gTokenClient){
-      gTokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-        callback: async (resp)=>{
-          if(resp.error){ statusEl.textContent = t('gmail_login_fail'); return; }
-          gAccessToken = resp.access_token;
-          await onGoogleSignedIn();
-        }
-      });
+function loadSavedProfilePic(){
+  let saved = '';
+  try{ saved = localStorage.getItem('myProfilePic_v1') || ''; }catch(e){}
+  if(saved) applyProfilePic(saved);
+}
+
+// ---- Local backup (download / restore file) ----
+const BACKUP_KEYS = ['moneyAppData_v1','myName_v1','myUsername_v1','myPhone_v1','myProfilePic_v1','customLogo_v1','appLang_v1','appTheme_v1'];
+function downloadBackup(){
+  const payload = {};
+  BACKUP_KEYS.forEach(k=>{ try{ const v = localStorage.getItem(k); if(v!==null) payload[k]=v; }catch(e){} });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hisab_backup_${todayStr()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 2000);
+  document.getElementById('backupStatusText').textContent = t('backup_download_done');
+}
+function restoreFromFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('backupStatusText');
+  if(!confirm(t('backup_restore_confirm'))){ input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const payload = JSON.parse(e.target.result);
+      Object.keys(payload).forEach(k=>{ try{ localStorage.setItem(k, payload[k]); }catch(err){} });
+      statusEl.textContent = t('backup_restore_done');
+      setTimeout(()=> location.reload(), 900);
+    }catch(err){
+      statusEl.textContent = t('backup_restore_fail');
     }
-    gTokenClient.requestAccessToken();
-  }catch(e){
-    statusEl.textContent = t('gmail_login_fail');
-  }
-}
-async function onGoogleSignedIn(){
-  const statusEl = document.getElementById('gmailStatusText');
-  try{
-    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{Authorization:'Bearer '+gAccessToken}});
-    const info = await res.json();
-    document.getElementById('gmailSignedOut').style.display = 'none';
-    document.getElementById('gmailSignedIn').style.display = 'block';
-    document.getElementById('gmailAvatar').src = info.picture || '';
-    document.getElementById('gmailName').textContent = info.name || info.email || '';
-    document.getElementById('gmailEmail').textContent = info.email || '';
-    statusEl.textContent = '';
-  }catch(e){
-    statusEl.textContent = t('gmail_login_fail');
-  }
-}
-function googleSignOut(){
-  try{ if(gAccessToken && window.google) google.accounts.oauth2.revoke(gAccessToken, ()=>{}); }catch(e){}
-  gAccessToken = null;
-  document.getElementById('gmailSignedOut').style.display = 'block';
-  document.getElementById('gmailSignedIn').style.display = 'none';
-  document.getElementById('gmailStatusText').textContent = '';
-}
-const BACKUP_KEYS = ['moneyAppData_v1','myName_v1','customLogo_v1','appLang_v1','appTheme_v1'];
-async function findDriveBackupFileId(){
-  const q = encodeURIComponent("name='fintrack_backup.json'");
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name)`, {
-    headers:{Authorization:'Bearer '+gAccessToken}
-  });
-  const j = await res.json();
-  return (j.files && j.files[0]) ? j.files[0].id : null;
-}
-async function backupToDrive(){
-  const statusEl = document.getElementById('gmailStatusText');
-  if(!gAccessToken){ statusEl.textContent = t('gmail_need_login'); return; }
-  statusEl.textContent = t('gmail_backing_up');
-  try{
-    const payload = {};
-    BACKUP_KEYS.forEach(k=>{ try{ const v = localStorage.getItem(k); if(v!==null) payload[k]=v; }catch(e){} });
-    const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
-    const fileId = await findDriveBackupFileId();
-    const metadata = {name:'fintrack_backup.json', mimeType:'application/json'};
-    if(!fileId) metadata.parents = ['appDataFolder'];
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
-    form.append('file', blob);
-    const url = fileId
-      ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
-      : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-    const res = await fetch(url, {method: fileId?'PATCH':'POST', headers:{Authorization:'Bearer '+gAccessToken}, body: form});
-    if(!res.ok) throw new Error('upload failed');
-    statusEl.textContent = t('gmail_backup_done');
-  }catch(e){
-    statusEl.textContent = t('gmail_backup_fail');
-  }
-}
-async function restoreFromDrive(){
-  const statusEl = document.getElementById('gmailStatusText');
-  if(!gAccessToken){ statusEl.textContent = t('gmail_need_login'); return; }
-  if(!confirm(t('gmail_restore_confirm'))) return;
-  statusEl.textContent = t('gmail_restoring');
-  try{
-    const fileId = await findDriveBackupFileId();
-    if(!fileId){ statusEl.textContent = t('gmail_no_backup'); return; }
-    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {headers:{Authorization:'Bearer '+gAccessToken}});
-    const payload = await res.json();
-    Object.keys(payload).forEach(k=>{ try{ localStorage.setItem(k, payload[k]); }catch(e){} });
-    statusEl.textContent = t('gmail_restore_done');
-    setTimeout(()=> location.reload(), 900);
-  }catch(e){
-    statusEl.textContent = t('gmail_restore_fail');
-  }
+  };
+  reader.readAsText(file);
+  input.value = '';
 }
 
 // ---- Custom app logo ----
@@ -1520,6 +1478,8 @@ function extractPersonFromText(msg){
   if(m) return m[1];
   m = msg.match(/([^\s,।]{2,20}?)(?:র|এর)?\s*কাছ\s*থেকে/);
   if(m) return m[1].replace(/(র|এর)$/,'');
+  m = msg.match(/([^\s,।]{2,20}?)(?:র|এর)?\s*কাছে/);
+  if(m) return m[1].replace(/(র|এর)$/,'');
   m = msg.match(/(?:from|to)\s+([A-Za-z][A-Za-z\s]{1,20}?)(?:\s|$)/i);
   if(m) return m[1].trim();
   return null;
@@ -1589,11 +1549,109 @@ function undoLastChatTx(){
   renderDash(); renderAccounts(); renderLoans(); renderHistory(); populatePersonList();
   return t('chat_undo_done');
 }
+
+// ---- Advanced chat: history browsing, targeted delete, person status ----
+let lastChatListIds = [];
+function deleteTxById(id){
+  data.transactions = data.transactions.filter(tx=>tx.id!==id);
+  saveData();
+  renderDash(); renderAccounts(); renderLoans(); renderHistory(); populatePersonList();
+}
+function formatTxLine(tx, idx){
+  const meta = TYPE_META[tx.type];
+  const sub = tx.type==='expense' ? tx.category : (tx.account || tx.person || '');
+  const sign = meta.sign>0 ? '+' : '−';
+  return `${idx}. ${t(meta.label)}${sub ? ' ('+sub+')' : ''} — ${sign}${fmt(tx.amount)} — ${tx.date}`;
+}
+function filterTxByText(msg){
+  let list = [...data.transactions];
+  const q = msg, ql = msg.toLowerCase();
+  const today = todayStr();
+  if(q.includes('আজ') || ql.includes('today')){
+    list = list.filter(tx=> tx.date===today);
+  }else if(q.includes('গতকাল') || ql.includes('yesterday')){
+    const d = new Date(today+'T00:00:00'); d.setDate(d.getDate()-1);
+    const ys = d.toISOString().slice(0,10);
+    list = list.filter(tx=> tx.date===ys);
+  }else if(q.includes('এই মাস') || ql.includes('this month')){
+    list = list.filter(tx=> tx.date.slice(0,7)===today.slice(0,7));
+  }
+  const person = extractPersonFromText(msg);
+  if(person) list = list.filter(tx=> tx.person===person);
+  const cat = extractCategoryFromText(msg);
+  if(cat) list = list.filter(tx=> tx.category===cat);
+  return list.sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
+}
+function showHistoryChat(msg){
+  const list = filterTxByText(msg).slice(0,8);
+  if(!list.length){ lastChatListIds = []; return t('chat_no_data'); }
+  lastChatListIds = list.map(tx=>tx.id);
+  const lines = list.map((tx,i)=> formatTxLine(tx,i+1));
+  return t('chat_history_intro') + '\n' + lines.join('\n') + '\n' + t('chat_history_hint');
+}
+function deleteFromLastList(num){
+  if(!lastChatListIds.length || num<1 || num>lastChatListIds.length) return t('chat_need_valid_number');
+  const id = lastChatListIds[num-1];
+  deleteTxById(id);
+  lastChatListIds.splice(num-1,1);
+  if(lastChatTxId===id) lastChatTxId = null;
+  return t('chat_deleted_one');
+}
+function deleteLastTransaction(){
+  if(!data.transactions.length) return t('chat_no_data');
+  const sorted = [...data.transactions].sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
+  const tx = sorted[0];
+  deleteTxById(tx.id);
+  if(lastChatTxId===tx.id) lastChatTxId = null;
+  return t('chat_deleted_one');
+}
+function personLoanStatus(person){
+  const {getMap, oweMap} = calcLoans();
+  const get = Math.round(getMap[person]||0), owe = Math.round(oweMap[person]||0);
+  if(!get && !owe) return null;
+  let resp = '';
+  if(get>0) resp += person + t('chat_owes_you_suffix') + fmt(get) + '। ';
+  if(owe>0) resp += person + t('chat_you_owe_suffix') + fmt(owe) + '। ';
+  return resp || null;
+}
 function getAIResponse(msg){
   const q = msg, ql = msg.toLowerCase();
-  if(q.includes('ফিরিয়ে নাও') || q.includes('মুছে দাও') || ql.includes('undo')){
+  const delKeyword = q.includes('মুছে') || q.includes('ডিলিট') || q.includes('বাদ') || ql.includes('delete') || ql.includes('remove');
+  const numMatch = msg.match(/(\d+)/);
+  const pureNum = msg.trim().match(/^(\d+)\s*(নং|নম্বর)?$/);
+
+  // 1) User replies with just a number after a history list -> delete that entry
+  if(pureNum && lastChatListIds.length){
+    return deleteFromLastList(parseInt(pureNum[1],10));
+  }
+  // 2) "3 মুছে দাও" / "delete 3" referencing the last shown list
+  if(delKeyword && numMatch && lastChatListIds.length){
+    return deleteFromLastList(parseInt(numMatch[1],10));
+  }
+  // 3) Delete the most recent transaction overall
+  if(delKeyword && (q.includes('সর্বশেষ') || q.includes('শেষ') || ql.includes('last'))){
+    return deleteLastTransaction();
+  }
+  // 4) Undo the last chat-added entry (also covers plain "মুছে দাও"/"undo" with no number/list)
+  if(q.includes('ফিরিয়ে নাও') || ql.includes('undo') || (delKeyword && !numMatch)){
     return undoLastChatTx();
   }
+
+  // 5) History / transaction list requests (optionally filtered by person, category, or date)
+  if(q.includes('হিস্ট্রি') || q.includes('ইতিহাস') || ql.includes('history') ||
+     (q.includes('লেনদেন') && (q.includes('দেখা') || q.includes('তালিকা')))){
+    return showHistoryChat(msg);
+  }
+
+  // 6) Person-specific loan/status question, e.g. "রহিমের কাছে কত পাবো"
+  if(q.includes('কত') || ql.includes('how much')){
+    const person = extractPersonFromText(msg);
+    if(person){
+      const status = personLoanStatus(person);
+      if(status) return status;
+    }
+  }
+
   const intent = detectChatIntent(msg);
   if(intent) return addTxFromChat(intent, msg);
 
@@ -1611,6 +1669,11 @@ function getAIResponse(msg){
     return resp;
   }
   if(q.includes('লোন') || ql.includes('loan') || q.includes('পাওনা') || ql.includes('owe')){
+    const person = extractPersonFromText(msg);
+    if(person){
+      const status = personLoanStatus(person);
+      if(status) return status;
+    }
     if(!totalOwe && !totalGet) return t('chat_no_data');
     return t('chat_owe') + fmt(totalOwe) + '। ' + t('chat_get') + fmt(totalGet);
   }
@@ -1646,8 +1709,10 @@ updateFormVisibility();
 document.getElementById('inDate').value = todayStr();
 document.getElementById('inTime').value = nowTime();
 document.getElementById('myNameInput').value = getMyName();
-document.getElementById('googleClientIdInput').value = getGoogleClientId();
+document.getElementById('myUsernameInput').value = getMyUsername();
+document.getElementById('myPhoneInput').value = getMyPhone();
 loadSavedLogo();
+loadSavedProfilePic();
 populatePersonList();
 let savedTheme = '';
 try{ savedTheme = localStorage.getItem('appTheme_v1') || ''; }catch(e){}
