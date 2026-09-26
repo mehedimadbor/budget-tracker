@@ -711,7 +711,7 @@ const TYPE_META = {
   expense:{label:'type_expense', sign:-1, needsCat:true, needsPerson:false, needsAccount:false},
   loan_taken:{label:'type_loan_taken', sign:1, needsCat:false, needsPerson:true, needsAccount:false},
   loan_given:{label:'type_loan_given', sign:-1, needsCat:false, needsPerson:true, needsAccount:false},
-  loan_repay_taken:{label:'type_loan_repay_taken', sign:-1, needsCat:false, needsPerson:true, needsAccount:false},
+  loan_repay_taken:{label:'type_loan_repay_taken', sign:-1, needsCat:true, needsPerson:true, needsAccount:false},
   loan_repay_given:{label:'type_loan_repay_given', sign:1, needsCat:false, needsPerson:true, needsAccount:false},
   save_to_account:{label:'type_save_to_account', sign:-1, needsCat:false, needsPerson:false, needsAccount:true},
   use_from_account:{label:'type_use_from_account', sign:1, needsCat:false, needsPerson:false, needsAccount:true}
@@ -878,12 +878,15 @@ function calcBalance(){
   data.transactions.forEach(tx=>{ bal += TYPE_META[tx.type].sign * tx.amount; });
   return bal;
 }
+function isExpenseLike(tx){
+  return tx.type==='expense' || (tx.type==='loan_repay_taken' && !!tx.category);
+}
 function calcTotalExpense(){
-  return data.transactions.filter(tx=>tx.type==='expense').reduce((s,tx)=>s+tx.amount,0);
+  return data.transactions.filter(isExpenseLike).reduce((s,tx)=>s+tx.amount,0);
 }
 function calcByCategory(){
   const map = {};
-  data.transactions.filter(tx=>tx.type==='expense').forEach(tx=>{
+  data.transactions.filter(isExpenseLike).forEach(tx=>{
     map[tx.category] = (map[tx.category]||0) + tx.amount;
   });
   return map;
@@ -945,9 +948,16 @@ function renderDash(){
   }
 }
 
+function txSubLabel(tx){
+  const parts = [];
+  if(tx.category) parts.push(tx.category);
+  if(tx.person) parts.push(tx.person);
+  if(!parts.length && tx.account) parts.push(tx.account);
+  return parts.join(' · ');
+}
 function txHtml(tx){
   const meta = TYPE_META[tx.type];
-  const sub = tx.type==='expense' ? tx.category : (tx.account || tx.person || '');
+  const sub = txSubLabel(tx);
   const posneg = meta.sign>0 ? 'pos' : 'neg';
   const sign = meta.sign>0 ? '+' : '−';
   return `<div class="txitem">
@@ -1020,7 +1030,7 @@ function printMonthlyReport(){
   if(!list.length){ html += `<p>${t('empty_no_tx')}</p>`; }
   list.forEach(tx=>{
     const meta = TYPE_META[tx.type];
-    const sub = tx.type==='expense' ? tx.category : (tx.account || tx.person || '');
+    const sub = txSubLabel(tx);
     html += `<div class="prow"><span>${tx.date} — ${esc(t(meta.label))}${sub?' · '+esc(sub):''}</span><span>${meta.sign>0?'+':'-'}${fmt(tx.amount)}</span></div>`;
   });
   html += `<h3>${t('report_loan_summary')}</h3>`;
@@ -1592,7 +1602,7 @@ function deleteTxById(id){
 }
 function formatTxLine(tx, idx){
   const meta = TYPE_META[tx.type];
-  const sub = tx.type==='expense' ? tx.category : (tx.account || tx.person || '');
+  const sub = txSubLabel(tx);
   const sign = meta.sign>0 ? '+' : '−';
   return `${idx}. ${t(meta.label)}${sub ? ' ('+sub+')' : ''} — ${sign}${fmt(tx.amount)} — ${tx.date}`;
 }
